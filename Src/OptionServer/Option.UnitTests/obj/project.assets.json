@@ -6765,11 +6765,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Option.UnitTests\\Option.UnitTests.csproj",
+      "projectUniqueName": "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Option.UnitTests\\Option.UnitTests.csproj",
       "projectName": "Option.UnitTests",
-      "projectPath": "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Option.UnitTests\\Option.UnitTests.csproj",
+      "projectPath": "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Option.UnitTests\\Option.UnitTests.csproj",
       "packagesPath": "C:\\Users\\g.beard\\.nuget\\packages\\",
-      "outputPath": "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Option.UnitTests\\obj\\",
+      "outputPath": "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Option.UnitTests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -6788,8 +6788,8 @@
       "frameworks": {
         "netcoreapp2.2": {
           "projectReferences": {
-            "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Option\\Option.csproj": {
-              "projectPath": "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Option\\Option.csproj"
+            "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Option\\Option.csproj": {
+              "projectPath": "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Option\\Option.csproj"
             }
           }
         }

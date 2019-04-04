@@ -3539,11 +3539,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Option\\Option.csproj",
+      "projectUniqueName": "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Option\\Option.csproj",
       "projectName": "Option",
-      "projectPath": "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Option\\Option.csproj",
+      "projectPath": "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Option\\Option.csproj",
       "packagesPath": "C:\\Users\\g.beard\\.nuget\\packages\\",
-      "outputPath": "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Option\\obj\\",
+      "outputPath": "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Option\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -3562,11 +3562,11 @@
       "frameworks": {
         "netcoreapp2.2": {
           "projectReferences": {
-            "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Black.Beard.OptionService.Models\\Black.Beard.OptionService.Models.csproj": {
-              "projectPath": "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Black.Beard.OptionService.Models\\Black.Beard.OptionService.Models.csproj"
+            "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Black.Beard.OptionService.Models\\Black.Beard.OptionService.Models.csproj": {
+              "projectPath": "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Black.Beard.OptionService.Models\\Black.Beard.OptionService.Models.csproj"
             },
-            "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Black.Beard.Sdk.HttpClient\\Black.Beard.Sdk.HttpClient.csproj": {
-              "projectPath": "D:\\Src\\Moleculars\\OptionServer\\src\\OptionServer\\Black.Beard.Sdk.HttpClient\\Black.Beard.Sdk.HttpClient.csproj"
+            "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Black.Beard.Sdk.HttpClient\\Black.Beard.Sdk.HttpClient.csproj": {
+              "projectPath": "D:\\Src\\Moleculars\\OptionServer\\Src\\OptionServer\\Black.Beard.Sdk.HttpClient\\Black.Beard.Sdk.HttpClient.csproj"
             }
           }
         }

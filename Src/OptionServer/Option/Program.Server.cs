@@ -14,8 +14,10 @@ namespace Option
             var cmd = app.Command("server", config =>
             {
 
+                config.Description = "set url on working configuration server";                
+                config.HelpOption(HelpFlag);
 
-                var validator = new groupArgument(config);
+                var validator = new GroupArgument(config);
 
                 var serverName = validator.Argument("server",
                     "Url server of the option server. (this argument is required)"

@@ -1,4 +1,5 @@
 ﻿using Bb.Option;
+using Bb.OptionService.Models;
 using Microsoft.Extensions.CommandLineUtils;
 using System;
 
@@ -11,6 +12,8 @@ namespace Option
         public static void Main(string[] args)
         {
 
+            Program._access = "('" + string.Join("','", Enum.GetNames(typeof(AccessModuleEnum))) + "')";
+
             Helper.Load();
 
             var app = new CommandLineApplication();
@@ -20,7 +23,7 @@ namespace Option
             //AddConnectuserCommand(app);
             AddGroupCommand(app);
 
-            app.HelpOption("-? | -h | --help");
+            app.HelpOption(HelpFlag);
             app.Execute(args);
 
             Helper.Save();
@@ -37,5 +40,7 @@ namespace Option
             return 1;
         }
 
+        private const string HelpFlag = "-? |-h |--help";
+        public static string _access;
     }
 }

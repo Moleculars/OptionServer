@@ -55,7 +55,11 @@ namespace Option.UnitTests
             Option.Program.Main(new string[] { "user", "add", username2, pass2, "pseudo1", "email@yopmail.com" });
             Option.Program.Main(new string[] { "user", "connect", username1, pass1 });
 
-            Option.Program.Main(new string[] { "group", "add", "groupPar1" });
+            //Option.Program.Main(new string[] { "group", "add", "groupPar1" });
+
+            Option.Program.Main(new string[] { "group", "grant", username1,  "groupPar1", "-appli='None'" });
+
+
             Option.Program.Main(new string[] { "group", "list" });
 
             Option.Program.Main(new string[] { "group", "connect", "groupPar1" });

@@ -15,13 +15,18 @@ namespace Option
             var cmd = app.Command("user", config =>
             {
 
+                config.Description = "create, lock, unlock, connect user";                
+                config.HelpOption(HelpFlag);
+
             });
 
             cmd.Command("add", config =>
             {
 
-                config.Description = "Add user in the option server";
-                var validator = new groupArgument(config);
+                config.Description = "Add a new user on the option server";
+                config.HelpOption(HelpFlag);
+
+                var validator = new GroupArgument(config);
 
                 var argUsername = validator.Argument("username",
                     "username of user. (this argument is required)"
@@ -70,8 +75,10 @@ namespace Option
             cmd.Command("connect", config =>
             {
 
-                config.Description = "connect a specific user";
-                var validator = new groupArgument(config);
+                config.Description = "Authenticate user";
+                config.HelpOption(HelpFlag);
+
+                var validator = new GroupArgument(config);
 
                  var argUsername = validator.Argument(
                     "username",
@@ -115,18 +122,7 @@ namespace Option
 
                 });
             });
-
-            cmd.Command("help", config =>
-            {
-                config.Description = "show help for commands that manager user";
-
-                config.OnExecute(() =>
-                {
-                    config.ShowHelp();
-                    return 0;
-                });
-            });
-
+         
         }
 
     }
