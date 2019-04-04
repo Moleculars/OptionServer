@@ -1,0 +1,9 @@
+D:\Src\ActionBus\src\Black.Beard.Security.Bearer\bin\Debug\netcoreapp2.2\Black.Beard.Security.Bearer.deps.json
+D:\Src\ActionBus\src\Black.Beard.Security.Bearer\bin\Debug\netcoreapp2.2\Black.Beard.Security.Bearer.dll
+D:\Src\ActionBus\src\Black.Beard.Security.Bearer\obj\Debug\netcoreapp2.2\Black.Beard.Security.Bearer.csprojAssemblyReference.cache
+D:\Src\ActionBus\src\Black.Beard.Security.Bearer\obj\Debug\netcoreapp2.2\Black.Beard.Security.Bearer.csproj.CoreCompileInputs.cache
+D:\Src\ActionBus\src\Black.Beard.Security.Bearer\obj\Debug\netcoreapp2.2\Black.Beard.Security.Bearer.AssemblyInfoInputs.cache
+D:\Src\ActionBus\src\Black.Beard.Security.Bearer\obj\Debug\netcoreapp2.2\Black.Beard.Security.Bearer.AssemblyInfo.cs
+D:\Src\ActionBus\src\Black.Beard.Security.Bearer\bin\Debug\netcoreapp2.2\Black.Beard.Security.Bearer.pdb
+D:\Src\ActionBus\src\Black.Beard.Security.Bearer\obj\Debug\netcoreapp2.2\Black.Beard.Security.Bearer.dll
+D:\Src\ActionBus\src\Black.Beard.Security.Bearer\obj\Debug\netcoreapp2.2\Black.Beard.Security.Bearer.pdb

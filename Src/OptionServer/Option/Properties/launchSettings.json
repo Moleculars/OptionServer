@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Option": {
+      "commandName": "Project",
+      "commandLineArgs": "server \"https://localhost:5001\""
+    }
+  }
+}

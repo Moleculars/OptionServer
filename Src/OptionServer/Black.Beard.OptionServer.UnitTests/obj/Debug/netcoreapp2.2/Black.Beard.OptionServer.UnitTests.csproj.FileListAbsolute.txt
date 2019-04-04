@@ -1,0 +1,17 @@
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.deps.json
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.runtimeconfig.json
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.runtimeconfig.dev.json
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.dll
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.pdb
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\obj\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.csprojAssemblyReference.cache
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\obj\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.csproj.CoreCompileInputs.cache
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\obj\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.AssemblyInfoInputs.cache
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\obj\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.AssemblyInfo.cs
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\obj\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.dll
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\obj\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.pdb
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Black.Beard.OptionServer.dll
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\bin\Debug\netcoreapp2.2\Black.Beard.OptionServer.pdb
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionServer.UnitTests\obj\Debug\netcoreapp2.2\Black.Beard.OptionServer.UnitTests.csproj.CopyComplete

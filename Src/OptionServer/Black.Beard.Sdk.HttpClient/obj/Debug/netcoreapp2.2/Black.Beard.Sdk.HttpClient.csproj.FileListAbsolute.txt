@@ -1,0 +1,9 @@
+D:\Src\Moleculars\OptionServer\Src\OptionServer\Black.Beard.Sdk.HttpClient\bin\Debug\netcoreapp2.2\Black.Beard.Sdk.HttpClient.deps.json
+D:\Src\Moleculars\OptionServer\Src\OptionServer\Black.Beard.Sdk.HttpClient\bin\Debug\netcoreapp2.2\Black.Beard.Sdk.HttpClient.dll
+D:\Src\Moleculars\OptionServer\Src\OptionServer\Black.Beard.Sdk.HttpClient\obj\Debug\netcoreapp2.2\Black.Beard.Sdk.HttpClient.csprojAssemblyReference.cache
+D:\Src\Moleculars\OptionServer\Src\OptionServer\Black.Beard.Sdk.HttpClient\obj\Debug\netcoreapp2.2\Black.Beard.Sdk.HttpClient.csproj.CoreCompileInputs.cache
+D:\Src\Moleculars\OptionServer\Src\OptionServer\Black.Beard.Sdk.HttpClient\obj\Debug\netcoreapp2.2\Black.Beard.Sdk.HttpClient.AssemblyInfoInputs.cache
+D:\Src\Moleculars\OptionServer\Src\OptionServer\Black.Beard.Sdk.HttpClient\obj\Debug\netcoreapp2.2\Black.Beard.Sdk.HttpClient.AssemblyInfo.cs
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.Sdk.HttpClient\bin\Debug\netcoreapp2.2\Black.Beard.Sdk.HttpClient.pdb
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.Sdk.HttpClient\obj\Debug\netcoreapp2.2\Black.Beard.Sdk.HttpClient.dll
+D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.Sdk.HttpClient\obj\Debug\netcoreapp2.2\Black.Beard.Sdk.HttpClient.pdb

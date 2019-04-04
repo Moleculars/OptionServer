@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <UserSecretsId>e083bbd8-326e-4da0-8b3b-197a4a859ecb</UserSecretsId>
+    <RootNamespace>Bb.OptionService</RootNamespace>
+    <StartupObject>Bb.OptionService.Program</StartupObject>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.0.2105168" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.6.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Black.Beard.OptionServer\Black.Beard.OptionServer.csproj" />
+    <ProjectReference Include="..\Black.Beard.OptionService.Models\Black.Beard.OptionService.Models.csproj" />
+    <ProjectReference Include="..\Black.Beard.Security.Bearer\Black.Beard.Security.Bearer.csproj" />
+  </ItemGroup>
+
+</Project>
