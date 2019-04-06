@@ -19,7 +19,7 @@ namespace Bb.Controllers
         }
 
         [HttpPost("add", Name = "user.create")]
-        public ActionResult<UserCreatedResultModel> Create([FromBody]CreateUserInputModel user)
+        public ActionResult<RootResultModel<UserCreatedResultModel>> Create([FromBody]CreateUserInputModel user)
         {
 
             if (!ModelState.IsValid)
@@ -29,21 +29,36 @@ namespace Bb.Controllers
             {
                 UserEntity auth = _service.AddUser(user.Login, user.Password, user.Mail, user.Pseudo);
                 if (auth != null)
-                    return Ok(new UserCreatedResultModel()
+                    return Ok(new RootResultModel<UserCreatedResultModel>()
                     {
+
                         Valid = true,
-                        Id = auth.Id,
-                        Username = auth.Username,
-                        Pseudo = auth.Pseudo,
+
+                        Datas = new UserCreatedResultModel()
+                        {
+                            Id = auth.Id,
+                            Username = auth.Username,
+                        }
+
                     });
 
                 else
-                    return Ok(new UserCreatedResultModel { Valid = false, Result = "failed to create user." });
+                    return Ok(
+                        new RootResultModel<UserCreatedResultModel>()
+                        {
+                            Valid = false,
+                            Message = "failed to create user.",
+                        });
 
             }
             catch (AllreadyExistException)
             {
-                return Ok(new UserCreatedResultModel { Valid = false, Result = "user allready exist" });
+                return new RootResultModel<UserCreatedResultModel>()
+                {
+                    Valid = false,
+                    Message = "user allready exist.",
+                };
+
             }
 
         }

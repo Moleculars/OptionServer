@@ -1,10 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Bb.Option.Validators;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace Bb.Option
 {
+
     public static class Helper
     {
 
@@ -16,6 +18,7 @@ namespace Bb.Option
 
         public static void Load()
         {
+
             if (File.Exists(filename))
             {
                 var txt = File.ReadAllText(filename);
@@ -23,6 +26,10 @@ namespace Bb.Option
             }
             else
                 Parameters = new Parameters();
+
+            if (!ValidatorExtension.CheckToken())
+                Helper.Parameters.Token = null;
+
         }
 
         public static void Save()

@@ -8,8 +8,9 @@ namespace Bb.Option.Validators
     {
 
 
-        public GroupArgument(CommandLineApplication config)
+        public GroupArgument(CommandLineApplication config, bool mustBeAuthenticated)
         {
+            _mustBeAuthenticated = mustBeAuthenticated;
             _config = config;
             _dicArgument = new Dictionary<CommandArgument, ContainerArgument>();
             _dicOption = new Dictionary<CommandOption, ContainerOption>();
@@ -40,7 +41,7 @@ namespace Bb.Option.Validators
 
             return cmd;
 
-        }       
+        }
 
 
 
@@ -76,7 +77,13 @@ namespace Bb.Option.Validators
 
         internal int Evaluate()
         {
+
             int result = 0;
+
+            if (_mustBeAuthenticated)
+                if (!ValidatorExtension.CheckToken())
+                    result = ValidatorExtension.Error("you must to be authenticated");
+
             foreach (var item in _dicArgument)
             {
                 var r = item.Value.Evaluate();
@@ -167,6 +174,7 @@ namespace Bb.Option.Validators
 
         }
 
+        public bool _mustBeAuthenticated { get; }
         private readonly CommandLineApplication _config;
         private Dictionary<CommandArgument, ContainerArgument> _dicArgument = new Dictionary<CommandArgument, ContainerArgument>();
         private readonly Dictionary<CommandOption, ContainerOption> _dicOption = new Dictionary<CommandOption, ContainerOption>();

@@ -1,5 +1,6 @@
 ﻿using Bb.Security.Jwt;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using System.Threading.Tasks;
 
 namespace Bb.Middlewares
@@ -18,7 +19,7 @@ namespace Bb.Middlewares
 
             if (context.Request.Headers.ContainsKey("authorization"))
             {
-                var tokenText = context.Request.Headers["authorization"];
+                StringValues tokenText = context.Request.Headers["authorization"];
                 if (!string.IsNullOrEmpty(tokenText))
                     context.User = _jwtTokenManager.ValidToken(tokenText);
             }

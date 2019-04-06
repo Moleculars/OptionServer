@@ -1,6 +1,6 @@
 using System;
 
-namespace Black.Beard.OptionService.Models
+namespace Bb.OptionService.Models
 {
     public class ErrorViewModel
     {

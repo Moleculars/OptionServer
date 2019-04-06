@@ -68,7 +68,7 @@ namespace Bb
             var user = User(username) ?? throw new MissingUserException(username);
 
             var group1 = repository.GetByname(username, groupName);
-            if (group1 != null)
+            if (group1 != null && group1.Count > 1)
                 throw new Exceptions.AllreadyExistException($"{username}.{groupName}");
 
             var result = repository.Create(user.Id, groupName);

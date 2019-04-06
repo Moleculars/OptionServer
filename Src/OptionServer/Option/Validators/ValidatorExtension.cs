@@ -43,19 +43,45 @@ namespace Bb.Option.Validators
 
         }
 
+        public static void Stop()
+        {
+            System.Diagnostics.Debugger.Launch();
+            System.Diagnostics.Debugger.Break();
+        }
+
+        public static int Error(string message)
+        {
+            Console.Error.WriteLine("");
+            Console.Error.WriteLine(message);
+            return 1;
+        }
 
         public static int Error(string message, CommandArgument arg)
         {
-            Console.WriteLine(string.Format(message, arg.Name));
+            Console.Error.WriteLine("");
+            Console.Error.WriteLine(string.Format(message, arg.Name));
             return 1;
         }
 
         public static int Error(string message, CommandOption arg)
         {
-            Console.WriteLine(string.Format(message, arg.Template));
+            Console.Error.WriteLine("");
+            Console.Error.WriteLine(string.Format(message, arg.Template));
+
+
+
             return 1;
         }
 
+        internal static bool CheckToken()
+        {
+            
+            if (string.IsNullOrEmpty(Helper.Parameters.Token))
+                return false;
+
+            return DateTime.Now < Helper.Parameters.TokenExpiration;
+
+        }
 
     }
 }

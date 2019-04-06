@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Bb.Http.Helpers
 {
@@ -12,7 +13,7 @@ namespace Bb.Http.Helpers
         public static HttpContent Serialize(this object self)
         {
             var payload = Newtonsoft.Json.JsonConvert.SerializeObject(self);
-            HttpContent c = new StringContent(payload, Encoding.UTF8, "application/json");
+            HttpContent c = new StringContent(payload, Encoding.UTF8, Application.Json);
             return c;
         }
 

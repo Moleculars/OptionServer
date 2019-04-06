@@ -1,5 +1,5 @@
 ﻿using Bb.Option;
-using Bb.OptionService.Models;
+using Bb.Option.Commands;
 using Microsoft.Extensions.CommandLineUtils;
 using System;
 
@@ -12,35 +12,42 @@ namespace Option
         public static void Main(string[] args)
         {
 
-            Program._access = "('" + string.Join("','", Enum.GetNames(typeof(AccessModuleEnum))) + "')";
+            try
+            {
 
-            Helper.Load();
+                var app = new CommandLineApplication()
+                    .Initialize()
+                    .CommandServer()
+                    .CommandUser()
+                    .CommandGroup()
+                ;
 
-            var app = new CommandLineApplication();
+                int result = app.Execute(args);
 
-            AdduserCommand(app);
-            AdServerCommand(app);
-            //AddConnectuserCommand(app);
-            AddGroupCommand(app);
+                if (result == 0)
+                    Helper.Save();
 
-            app.HelpOption(HelpFlag);
-            app.Execute(args);
+                else if (result == 1)
+                    app.ShowHelp();
 
-            Helper.Save();
+                Environment.ExitCode = result;
+
+            }
+            catch (Exception e)
+            {
+                
+                Console.Error.WriteLine(e.Message);
+                Console.Error.WriteLine(e.StackTrace);
+
+                if (e.HResult > 0)
+                    Environment.ExitCode = e.HResult;
+
+                Environment.ExitCode = 1;
+
+            }
 
         }
 
-
-        public static BbClientHttp Client => new BbClientHttp(new Uri(Helper.Parameters.ServerUrl));
-
-
-        private static int Error(string message, CommandArgument arg)
-        {
-            Console.WriteLine(string.Format(message, arg.Name));
-            return 1;
-        }
-
-        private const string HelpFlag = "-? |-h |--help";
-        public static string _access;
+ 
     }
 }

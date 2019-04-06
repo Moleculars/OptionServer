@@ -34,7 +34,15 @@ namespace Bb.OptionService.Controllers
             var groups = _service.CreateGroupApplication(username, groupName);
             List<GroupApplicationResult> _dic = Converts(groups);
 
-            return Ok(_dic);
+            return Ok
+                (
+                    new RootResultModel<GroupApplicationResult>()
+                    {
+                        Valid = true,
+                        Datas = _dic.FirstOrDefault(),
+                    }
+                );
+
 
         }
 
@@ -54,7 +62,14 @@ namespace Bb.OptionService.Controllers
             var groups = _service.GroupApplication(username, groupName);
             List<GroupApplicationResult> _items = Converts(groups);
 
-            return Ok(_items);
+            return Ok
+            (
+                new RootResultModel<GroupApplicationResult>()
+                {
+                    Valid = true,
+                    Datas = _items.FirstOrDefault(),
+                }
+            );
 
         }
 
@@ -73,7 +88,14 @@ namespace Bb.OptionService.Controllers
             var groups = _service.GetGroupApplicationsForUser(username);
             List<GroupApplicationResult> items = Converts(groups);
 
-            return Ok(items);
+            return Ok
+            (
+                new RootResultModel<List<GroupApplicationResult>>()
+                {
+                    Valid = true,
+                    Datas = items,
+                }
+            );
 
         }
 
@@ -90,18 +112,44 @@ namespace Bb.OptionService.Controllers
             if (string.IsNullOrEmpty(username))
                 return Unauthorized();
 
-            var groups = _service.SetAccess(
-                username, 
-                model.User, 
-                model.GroupName, 
-                (AccessEntityEnum)(int)model.AccessApplication, 
-                (AccessEntityEnum)(int)model.AccessType, 
-                (AccessEntityEnum)(int)model.AccessEnvironment
-            );
+            try
+            {
 
-            GroupApplicationResult _item = Convert(groups);
+                var groups = _service.SetAccess(
+                    username,
+                    model.User,
+                    model.GroupName,
+                    (AccessEntityEnum)(int)model.AccessApplication,
+                    (AccessEntityEnum)(int)model.AccessType,
+                    (AccessEntityEnum)(int)model.AccessEnvironment
+                );
 
-            return Ok(_item);
+                GroupApplicationResult _items = Convert(groups);
+
+                return Ok
+                (
+                    new RootResultModel<GroupApplicationResult>()
+                    {
+                        Valid = true,
+                        Datas = _items,
+                    }
+                );
+
+
+            }
+            catch (System.Exception e)
+            {
+
+                var error = new RootResultModel<GroupApplicationResult>()
+                {
+                    Valid = true,
+                    Message = e.Message,
+                    Datas = null,
+                };
+
+                return BadRequest(error);
+
+            }
 
         }
 
