@@ -20,6 +20,7 @@ namespace Option
                     .CommandServer()
                     .CommandUser()
                     .CommandGroup()
+                    .CommandEnvironment()
                 ;
 
                 int result = app.Execute(args);

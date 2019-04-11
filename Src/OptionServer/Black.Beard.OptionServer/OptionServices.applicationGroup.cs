@@ -46,7 +46,9 @@ namespace Bb
             var repository = ApplicationGroups;
 
             var result = repository.GetAccessByGoupApplicationName(user.Id, groupName);
+
             return result;
+
         }
 
         public List<ApplicationGroupAccessEntity> GetGroupApplicationsForUser(string username)

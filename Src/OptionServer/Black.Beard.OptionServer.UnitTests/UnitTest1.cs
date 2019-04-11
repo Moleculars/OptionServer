@@ -87,6 +87,31 @@ namespace Black.Beard.OptionServer.UnitTests
             var grp4 = repGroup.GetAccessByGoupApplicationName(user1.Id, groupName).FirstOrDefault();
             Assert.AreEqual(grp4.EnvironmentAccess, AccessEntityEnum.Add);
 
+            var repEnv = new EnvironmentRepository(manager);
+            var e = new EnvironmentEntity()
+            {
+                Id = Guid.NewGuid(),
+                GroupId = grp2.ApplicationGroupId,
+                Name = "Debug1",
+            };
+            repEnv.Save(e);
+
+            e.Name = "Debug";
+            repEnv.Save(e);
+
+            var repType = new TypeRepository(manager);
+            var type = new TypeEntity()
+            {
+                Name = "fichier.json1",
+                Extension = ".json",
+                GroupId = grp2.ApplicationGroupId,
+                Version = new Bb.Entities.TypeVersionEntity()
+                {
+                    Contract = "test",
+                },
+            };
+            repType.Insert(type);
+
         }
 
 

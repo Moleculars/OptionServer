@@ -5,7 +5,6 @@ using System.Text;
 namespace Bb.Exceptions
 {
 
-
     [Serializable]
     public class InvalidNameException : Exception
     {

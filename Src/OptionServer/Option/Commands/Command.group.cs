@@ -61,6 +61,34 @@ namespace Bb.Option.Commands
 
             });
 
+            cmd.Command("set", config =>
+            {
+
+                config.Description = "set group for working";
+                config.HelpOption(HelpFlag);
+
+                var validator = new GroupArgument(config, true);
+
+                var argGroupName = validator.Argument("groupName",
+                    "application group name that contains all configuration of your pool of aapplication. (this argument is required)"
+                    , ValidatorExtension.EvaluateRequired
+                    );
+
+                config.OnExecute(() =>
+                {
+
+                    if (validator.Evaluate() > 0)
+                        return 1;
+
+                    Helper.Parameters.WorkingGroup = argGroupName.Value;
+                    Console.WriteLine($"working group setted on {Helper.Parameters.WorkingGroup}");
+
+                    return 0;
+
+                });
+
+            });
+
             cmd.Command("get", config =>
             {
 

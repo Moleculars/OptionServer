@@ -29,7 +29,7 @@ namespace Bb.OptionServer
             }
             else
             {
-                string sql = @"UPDATE [Users] ([Username] = @username, [Pseudo] = @pseudo, [Email] = @email, [HashPassword] = @hashPassword, [LastUpdate]= CURRENT_TIMESTAMP, [SecurityCoherence]=NEWID() WHERE [Id] = @id AND [SecurityCoherence]=@securityCoherence";
+                string sql = @"UPDATE [Users] SET [Username] = @username, [Pseudo] = @pseudo, [Email] = @email, [HashPassword] = @hashPassword, [LastUpdate]= CURRENT_TIMESTAMP, [SecurityCoherence]=NEWID() WHERE [Id] = @id AND [SecurityCoherence]=@securityCoherence";
                 return _provider.Update(sql, ctx.Items.ToArray());
             }
 

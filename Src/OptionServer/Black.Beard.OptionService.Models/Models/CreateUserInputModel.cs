@@ -3,6 +3,7 @@
 namespace Bb.OptionService.Models
 {
 
+
     public class CreateUserInputModel
     {
 

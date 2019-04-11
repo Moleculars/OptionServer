@@ -51,19 +51,23 @@ namespace Option.UnitTests
             string pass2 = Guid.NewGuid().ToString();
 
             Option.Program.Main(new string[] { "server", "https://localhost:5001" });
-            Option.Program.Main(new string[] { "user", "add", username1, pass1, "pseudo1", "email@yopmail.com" });
-            Option.Program.Main(new string[] { "user", "add", username2, pass2, "pseudo1", "email@yopmail.com" });
+            Option.Program.Main(new string[] { "user", "add", username1, pass1, "pseudo1", "email1@yopmail.com" });
+            Option.Program.Main(new string[] { "user", "add", username2, pass2, "pseudo1", "email2@yopmail.com" });
             Option.Program.Main(new string[] { "user", "connect", username1, pass1 });
 
             Option.Program.Main(new string[] { "group", "add", "groupPar1" });
             Option.Program.Main(new string[] { "group", "list" });
 
-            Option.Program.Main(new string[] { "group", "grant", "groupPar1", username1, "-appli='None'" });
-
-
+            Option.Program.Main(new string[] { "group", "grant", "groupPar1", username2, "-appli='Add'" });
+            Option.Program.Main(new string[] { "user", "connect", username2, pass2 });
             Option.Program.Main(new string[] { "group", "list" });
 
-            Option.Program.Main(new string[] { "group", "connect", "groupPar1" });
+            Option.Program.Main(new string[] { "user", "connect", username1, pass1 });
+            Option.Program.Main(new string[] { "group", "set", "groupPar1" });
+
+            Option.Program.Main(new string[] { "env", "add", "debug" });
+            Option.Program.Main(new string[] { "env", "list" });
+            
 
             Bb.Option.Helper.Parameters = null;
             Bb.Option.Helper.Load();

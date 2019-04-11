@@ -10,6 +10,16 @@ namespace Bb.Option.Validators
     {
 
 
+        public static int EvaluateGroupName()
+        {
+
+            if (string.IsNullOrEmpty(Helper.Parameters.WorkingGroup))
+                return ValidatorExtension.Error($"working group must be setted. please considere use '{Constants.RootCommand} group set <groupName>'.");
+
+            return 0;
+
+        }
+
         public static int EvaluateAccessEnum(CommandOption command)
         {
             // Program._access = "('" + string.Join("','", Enum.GetNames(typeof(AccessModuleEnum))) + "')";
@@ -75,7 +85,7 @@ namespace Bb.Option.Validators
 
         internal static bool CheckToken()
         {
-            
+
             if (string.IsNullOrEmpty(Helper.Parameters.Token))
                 return false;
 

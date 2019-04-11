@@ -65,7 +65,7 @@ namespace Bb.Option.Commands
                     var result = Client.Post<RootResultModel<UserCreatedResultModel>>("api/user/add", model);
                     result.Wait();
 
-                    Console.WriteLine($"user {argUsername.Value} added with key {result.Result.Datas.Id}");
+                    Console.WriteLine($"user {argUsername.Value} is added");
 
                     return 0;
 
@@ -112,6 +112,7 @@ namespace Bb.Option.Commands
                         Helper.Parameters.Token = result.Result;
                         Helper.Parameters.TokenExpiration = DateTime.Now.AddMinutes(60);
                         Console.WriteLine($"{argUsername.Value} is connected");
+                        Helper.Parameters.WorkingGroup = null;
                     }
                     catch (Exception e)
                     {
