@@ -1,6 +1,7 @@
 ﻿using Bb.OptionService.Models;
 using Microsoft.Extensions.CommandLineUtils;
 using System;
+using System.IO;
 
 namespace Bb.Option.Validators
 {
@@ -20,14 +21,28 @@ namespace Bb.Option.Validators
 
         }
 
-        public static int EvaluateAccessEnum(CommandOption command)
+        public static int EvaluateFileExist(CommandOption option)
+        {
+
+            if (option.HasValue())
+            {
+                FileInfo file = new FileInfo( option.Value());
+                if (!file.Exists)
+                    return Error($"file '{file.FullName}' not found");
+            }
+
+            return 0;
+
+        }
+
+        public static int EvaluateAccessEnum(CommandOption option)
         {
             // Program._access = "('" + string.Join("','", Enum.GetNames(typeof(AccessModuleEnum))) + "')";
 
-            if (command.HasValue())
+            if (option.HasValue())
             {
 
-                var value = command
+                var value = option
                     .Value()
                     .Trim()
                     .Trim('\'')
@@ -35,7 +50,7 @@ namespace Bb.Option.Validators
 
                 if (!Enum.TryParse(typeof(AccessModuleEnum), value, out object e))
                 {
-                    return Error("{0} is unexpected", command);
+                    return Error("{0} is unexpected", option);
                 }
             }
 
@@ -61,22 +76,22 @@ namespace Bb.Option.Validators
 
         public static int Error(string message)
         {
-            Console.Error.WriteLine("");
-            Console.Error.WriteLine(message);
+            Output.ErrorWriteLine();
+            Output.ErrorWriteLine(message);
             return 1;
         }
 
         public static int Error(string message, CommandArgument arg)
         {
-            Console.Error.WriteLine("");
-            Console.Error.WriteLine(string.Format(message, arg.Name));
+            Output.ErrorWriteLine();
+            Output.ErrorWriteLine(message, arg.Name);
             return 1;
         }
 
         public static int Error(string message, CommandOption arg)
         {
-            Console.Error.WriteLine("");
-            Console.Error.WriteLine(string.Format(message, arg.Template));
+            Output.ErrorWriteLine();
+            Output.ErrorWriteLine(message, arg.Template);
 
 
 

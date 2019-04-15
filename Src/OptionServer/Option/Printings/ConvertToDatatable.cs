@@ -13,19 +13,34 @@ namespace Bb.Option.Printings
 
         public static DataTable Convert<T>(T result, string label, params Expression<Func<T, object>>[] items)
         {
-            return ConvertList(new T[] { result }, label, items);
+            return ConvertList<T>(new T[] { result }, label, items);
         }
 
         public static DataTable ConvertList<T>(IEnumerable<T> rows, string label, params Expression<Func<T, object>>[] columns)
         {
 
+            Type _type = rows.FirstOrDefault().GetType();
+
+            var properties = GetMember(columns).Select(c => c.Name).ToArray();
+
+            var r = rows.Cast<object>().ToList();
+
+            return ConvertList(r, label, properties);
+        }
+
+        public static DataTable ConvertList(IEnumerable<object> rows, string label, string[] columns)
+        {
+
+            Type _type = rows.FirstOrDefault().GetType();
+
+            var props = _type.GetProperties(BindingFlags.Instance | BindingFlags.Public).ToList();
             List<PropertyInfo> members = (columns.Length > 0)
-                ? GetMember(columns).ToList()
-                : typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).ToList();
+                ? props
+                : props.Where(c => columns.Contains(c.Name)).ToList();
 
             DataTable table = new DataTable
             {
-                TableName = label ?? typeof(T).Name,
+                TableName = label ?? _type.Name,
             };
 
             foreach (var item in members)
@@ -50,7 +65,7 @@ namespace Bb.Option.Printings
 
         }
 
-        public static IEnumerable<PropertyInfo> GetMember<T>(params Expression<Func<T, object>>[] items)
+        public static IEnumerable<PropertyInfo> GetMember(params Expression[] items)
         {
 
             foreach (var item in items)

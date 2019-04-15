@@ -29,12 +29,12 @@ namespace Bb.Option.Commands
                 {
 
                     if (validator.Evaluate() > 0)
-                        return 1;
+                        return 2;
 
                     var uri = new Uri(serverName.Value);
 
                     Helper.Parameters.ServerUrl = serverName.Value;
-                    Console.WriteLine("server option setted on : " + Helper.Parameters.ServerUrl);
+                    Output.WriteLine("server option setted on : " + Helper.Parameters.ServerUrl);
 
                     return 0;
 

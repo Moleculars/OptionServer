@@ -68,6 +68,13 @@ namespace Option.UnitTests
             Option.Program.Main(new string[] { "env", "add", "debug" });
             Option.Program.Main(new string[] { "env", "list" });
             
+            Option.Program.Main(new string[] { "type", "add", "typeJson", ".json" });
+
+            Option.Program.Main(new string[] { "type", "list" });
+            Option.Program.Main(new string[] { "type", "extension", "typeJson", ".test.json" });
+
+            Option.Program.Main(new string[] { "type", "extension", "contract", "{ }" });
+
 
             Bb.Option.Helper.Parameters = null;
             Bb.Option.Helper.Load();

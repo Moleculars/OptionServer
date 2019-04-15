@@ -38,16 +38,16 @@ namespace Bb.Option.Commands
                 {
 
                     if (validator.Evaluate() > 0)
-                        return 1;
+                        return 2;
 
                     var result = Client.Get<RootResultModel<GroupApplicationResult>>($"api/ApplicationGroup/add/{argGroupName.Value}", GetToken());
                     result.Wait();
 
                     if (result.Result != null)
                     {
-                        Console.WriteLine($"group '{argGroupName.Value}' created");
+                        Output.WriteLine($"group '{argGroupName.Value}' created");
                         Helper.Parameters.WorkingGroup = argGroupName.Value;
-                        Console.WriteLine($"working group setted on {Helper.Parameters.WorkingGroup}");
+                        Output.WriteLine($"working group setted on {Helper.Parameters.WorkingGroup}");
 
                         PrintDataExtensions.ClearBorder();
                         ConvertToDatatable.Convert(new GroupModel(result.Result.Datas), "list of groups you can to use")
@@ -78,10 +78,10 @@ namespace Bb.Option.Commands
                 {
 
                     if (validator.Evaluate() > 0)
-                        return 1;
+                        return 2;
 
                     Helper.Parameters.WorkingGroup = argGroupName.Value;
-                    Console.WriteLine($"working group setted on {Helper.Parameters.WorkingGroup}");
+                    Output.WriteLine($"working group setted on {Helper.Parameters.WorkingGroup}");
 
                     return 0;
 
@@ -106,7 +106,7 @@ namespace Bb.Option.Commands
                 {
 
                     if (validator.Evaluate() > 0)
-                        return 1;
+                        return 2;
 
                     var result = Client.Get<RootResultModel<GroupApplicationResult>>($"api/ApplicationGroup/get/{argGroupName.Value}", GetToken());
                     result.Wait();

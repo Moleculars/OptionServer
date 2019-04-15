@@ -42,7 +42,7 @@ namespace Bb.Option.Commands
                         return r;
 
                     if (validator.Evaluate() > 0)
-                        return 1;
+                        return 2;
 
                     var model = new EnviromnentModel()
                     {
@@ -53,7 +53,7 @@ namespace Bb.Option.Commands
                     var result = Client.Post<RootResultModel<EnviromnentModel>>("api/environment/add", model, GetToken());
                     result.Wait();
 
-                    Console.WriteLine($"environment {argenvironmentName.Value} is added on group {result.Result.Datas.Groupname}.");
+                    Output.WriteLine($"environment {argenvironmentName.Value} is added on group {result.Result.Datas.Groupname}.");
 
                     return 0;
 
@@ -71,7 +71,7 @@ namespace Bb.Option.Commands
 
                     var r = ValidatorExtension.EvaluateGroupName();
                     if (r > 0)
-                        return r;
+                        return 2;
 
                     var result = Client.Get<RootResultModel<List<EnviromnentModel>>>($"api/environment/list/{Helper.Parameters.WorkingGroup}", GetToken());
                     result.Wait();
@@ -80,7 +80,6 @@ namespace Bb.Option.Commands
                     ConvertToDatatable
                         .ConvertList(result.Result.Datas, "environments")
                         .Print();
-
 
                     return 0;
 

@@ -969,19 +969,19 @@ namespace Bb.Option.Printings
                 return;
 
             if (args == null)
-                Console.Write(value);
+                Output.Write(value);
             else
-                Console.Write(value, args);
+                Output.Write(value, args);
         }
 
         private static void ConsoleWriteLine(string value = null, params object[] args)
         {
             if (string.IsNullOrEmpty(value))
-                Console.WriteLine();
+                Output.WriteLine();
             else if (args == null)
-                Console.WriteLine(value);
+                Output.WriteLine(value);
             else
-                Console.WriteLine(value, args);
+                Output.WriteLine(value, args);
         }
 
         #endregion

@@ -52,7 +52,7 @@ namespace Bb.Option.Commands
                 {
 
                     if (validator.Evaluate() > 0)
-                        return 1;
+                        return 2;
 
                     var model = new CreateUserInputModel()
                     {
@@ -65,7 +65,7 @@ namespace Bb.Option.Commands
                     var result = Client.Post<RootResultModel<UserCreatedResultModel>>("api/user/add", model);
                     result.Wait();
 
-                    Console.WriteLine($"user {argUsername.Value} is added");
+                    Output.WriteLine($"user {argUsername.Value} is added");
 
                     return 0;
 
@@ -96,7 +96,7 @@ namespace Bb.Option.Commands
                 {
 
                     if (validator.Evaluate() > 0)
-                        return 1;
+                        return 2;
 
                     var model = new LoginInputModel()
                     {
@@ -111,12 +111,12 @@ namespace Bb.Option.Commands
                         result.Wait();
                         Helper.Parameters.Token = result.Result;
                         Helper.Parameters.TokenExpiration = DateTime.Now.AddMinutes(60);
-                        Console.WriteLine($"{argUsername.Value} is connected");
+                        Output.WriteLine($"{argUsername.Value} is connected");
                         Helper.Parameters.WorkingGroup = null;
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.Message);
+                        Output.WriteLine(e.Message);
                         return 1;
                     }
 
