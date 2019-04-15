@@ -13,6 +13,8 @@
 # Additionals products
 swagger-codegen/
 
+# git
+.vs/
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

@@ -17,7 +17,7 @@ namespace Bb.OptionService.Models
         public string Validator { get; set; }
 
         public int Version { get; set; }
-
+        public string Sha256 { get; set; }
     }
 
 

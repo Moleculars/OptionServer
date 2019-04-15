@@ -60,7 +60,7 @@ namespace Bb.Option.Commands
                         : string.Empty
                         ;
 
-                    contract = SerializeContract(contract);
+                    contract = contract.SerializeContract();
 
                     var model = new TypeModel()
                     {
@@ -96,12 +96,10 @@ namespace Bb.Option.Commands
                     var result = Client.Get<RootResultModel<List<TypeModel>>>($"api/type/list/{Helper.Parameters.WorkingGroup}", GetToken());
                     result.Wait();
 
-
-                    ConvertDataToShow(result.Result.Datas);
-
+                    var _result = Helper.ConvertDataToShow(result.Result.Datas);
 
                     ConvertToDatatable
-                        .ConvertList(result.Result.Datas, "types")
+                        .ConvertList(_result, "types")
                         .Print();
 
                     return 0;
@@ -122,6 +120,10 @@ namespace Bb.Option.Commands
                     , ValidatorExtension.EvaluateRequired
                 );
 
+                var _contract = validator.OptionNoValue("-contract", 
+                    "want to show contract validation"
+                    );
+
                 config.OnExecute(() =>
                 {
 
@@ -135,10 +137,21 @@ namespace Bb.Option.Commands
                     var result = Client.Get<RootResultModel<TypeModel>>($"api/type/get/{Helper.Parameters.WorkingGroup}/{argTypeName.Value}", GetToken());
                     result.Wait();
 
-                    ConvertToDatatable
-                        .Convert(result.Result.Datas, "type")
-                        .PrintList();
+                    var type = result.Result.Datas;
 
+                    if (_contract.HasValue())
+                    {
+                        Output.WriteLine($"{type.TypeName}, Version {type.Version}");
+                        Output.WriteLine(type.Validator.DeserializeContract());
+                    }
+                    else
+                    {
+
+                        ConvertToDatatable
+                            .Convert(type, "type")
+                            .PrintList();
+
+                    }
                     return 0;
 
                 });
@@ -219,7 +232,7 @@ namespace Bb.Option.Commands
 
                     var contract = Helper.LoadContentFromFile(argContractFile.Value());
 
-                    contract = SerializeContract(contract);
+                    contract = contract.SerializeContract();
 
                     var model = new TypeModel()
                     {
@@ -247,21 +260,6 @@ namespace Bb.Option.Commands
 
         }
 
-        private static string SerializeContract(string contract)
-        {
-            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(contract);
-            var result = Convert.ToBase64String(bytes);
-            return result;
-        }
-
-        private static List<TypeToShow> ConvertDataToShow(List<TypeModel> datas)
-        {
-            return datas.Select(c => new TypeToShow(c)).ToList();
-
-        }
-
-
-
     }
 
     public class TypeToShow
@@ -273,6 +271,8 @@ namespace Bb.Option.Commands
             Type = type.TypeName;
             Extension = type.Extension;
             Version = type.Version;
+            Sha256 = type.Sha256;
+            Contract = type.Validator.DeserializeContract().Replace("\r", "").Replace("\n", "").Take(15).ToString();
         }
 
         public string Group { get; }
@@ -283,6 +283,8 @@ namespace Bb.Option.Commands
 
         public int Version { get; }
 
+        public string Sha256 { get; }
+        public string Contract { get; }
     }
 
 }

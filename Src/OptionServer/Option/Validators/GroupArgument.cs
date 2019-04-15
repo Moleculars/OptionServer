@@ -18,6 +18,11 @@ namespace Bb.Option.Validators
 
 
 
+        public CommandOption OptionNoValue(string name, string Description, params Func<CommandOption, int>[] validators)
+        {
+            return Option(name, Description, CommandOptionType.NoValue, validators);
+        }
+
         public CommandOption Option(string name, string Description, params Func<CommandOption, int>[] validators)
         {
             return Option(name, Description, CommandOptionType.SingleValue, validators);

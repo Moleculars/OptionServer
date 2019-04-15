@@ -1,7 +1,11 @@
-﻿using Bb.Option.Validators;
+﻿using Bb.Option.Commands;
+using Bb.Option.Validators;
+using Bb.OptionService.Models;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Bb.Option
@@ -77,6 +81,39 @@ namespace Bb.Option
 
             return fileContents;
 
+        }
+
+
+
+        public static string SerializeContract(this string self)
+        {
+
+            if (string.IsNullOrEmpty(self))
+                return string.Empty;
+
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(self);
+            var result = Convert.ToBase64String(bytes);
+            return result;
+        }
+
+
+        public static string DeserializeContract(this string self)
+        {
+
+            if (string.IsNullOrEmpty(self))
+                return string.Empty;
+
+            byte[] bytes = Convert.FromBase64String(self); ;
+            string result = System.Text.Encoding.UTF8.GetString(bytes);
+
+            return result;
+
+        }
+
+
+        public static List<TypeToShow> ConvertDataToShow(List<TypeModel> datas)
+        {
+            return datas.Select(c => new TypeToShow(c)).ToList();
         }
 
 

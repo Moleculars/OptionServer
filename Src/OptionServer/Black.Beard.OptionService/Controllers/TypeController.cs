@@ -46,6 +46,7 @@ namespace Bb.Controllers
                             TypeName = env.Name,
                             Extension = env.Extension,
                             Validator = env.Version.Contract,
+                            Sha256 = env.Version.Sha256,
                             Version = env.Version.Version,
                         }
                     });
@@ -208,6 +209,7 @@ namespace Bb.Controllers
                             Extension = c.Extension,
                             Validator = c.Version.Contract,
                             Version = c.Version.Version,
+                            Sha256 = c.Version.Sha256,
                         }).ToList()
                     });
 
