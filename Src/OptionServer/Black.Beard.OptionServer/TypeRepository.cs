@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace Bb.OptionServer
 {
@@ -21,26 +23,11 @@ namespace Bb.OptionServer
             if (string.IsNullOrEmpty(type.Extension))
                 throw new Exceptions.InvalidValueException(nameof(type.Extension));
 
-            type.Id = Guid.NewGuid();
-            type.CurrentVersionId = Guid.NewGuid();
             type.SecurityCoherence = Guid.NewGuid();
-
-            if (type.Version == null)
-                type.Version = new Entities.TypeVersionEntity()
-                {
-                    Id = type.CurrentVersionId,
-                    TypeId = type.Id,
-                };
+            type.Version.SecurityCoherence = Guid.NewGuid();
 
             if (!type.Extension.StartsWith("."))
                 type.Extension = "." + type.Extension;
-
-            if (type.Version == null)
-                type.Version = new Entities.TypeVersionEntity()
-                {
-                    Id = type.CurrentVersionId,
-                    TypeId = type.Id,
-                };
 
             DbUpdateContext ctx = new DbUpdateContext()
             {
@@ -49,7 +36,7 @@ namespace Bb.OptionServer
             type.GenerateSave(ctx);
 
 
-            string sql = @"INSERT INTO [dbo].[Type] ([Id], [Name], [Extension], [CurrentVersionId], [GroupId], [LastUpdate], [SecurityCoherence]) VALUES(@id, @Name, @extension, null, @groupId, CURRENT_TIMESTAMP, @securityCoherenceType)";
+            string sql = @"INSERT INTO [dbo].[Type] ([Id], [Name], [Extension], [CurrentVersionId], [GroupId], [LastUpdate], [SecurityCoherence]) VALUES(@id, @Name, @extension, @currentVersionId, @groupId, CURRENT_TIMESTAMP, @securityCoherence)";
 
             using (var trans = _provider.GetTransaction())
             {
@@ -68,7 +55,21 @@ namespace Bb.OptionServer
 
         }
 
-        public bool Update(TypeEntity type)
+        internal void ReadVersionsByGroupIds(List<TypeEntity> types)
+        {
+
+            var indexByCurrentId = types.ToLookup(c => c.CurrentVersionId);
+            var groupIds = new HashSet<Guid>( types.Select(c => c.GroupId));
+
+            foreach (Guid groupId in groupIds)
+                foreach (var version in this._version.ReadByGroupId(groupId))
+                    if (indexByCurrentId.Contains(version.Id))
+                        foreach (var item2 in indexByCurrentId[version.Id])
+                            item2.Version = version;
+
+        }
+
+        public bool UpdateContract(TypeEntity type)
         {
 
             bool result = false;
@@ -76,22 +77,14 @@ namespace Bb.OptionServer
             if (string.IsNullOrEmpty(type.Extension))
                 throw new Exceptions.InvalidValueException(nameof(type.Extension));
 
-            if (!type.Extension.StartsWith("."))
-                type.Extension = "." + type.Extension;
-
-            var version = _version.ReadByContract(type.Id, type.Version.Contract);
-
             string sql = @"UPDATE [dbo].[Type] SET [Name] = @name, [Extension]=@extension, [LastUpdate] = CURRENT_TIMESTAMP, [SecurityCoherence] = @newSecurityCoherenceType
             WHERE [Id] = @id AND [SecurityCoherence]=@securityCoherence";
 
             using (var trans = _provider.GetTransaction())
             {
 
-                if (version == null)
-                {
-                    type.CurrentVersionId = type.Version.Id = Guid.NewGuid();
-                    _version.Insert(type.Version);
-                }
+                type.CurrentVersionId = type.Version.Id = Guid.NewGuid();
+                _version.Insert(type.Version);
 
                 DbUpdateContext ctx = new DbUpdateContext()
                 {
@@ -109,6 +102,31 @@ namespace Bb.OptionServer
             return result;
 
         }
+
+        public bool UpdateExtension(TypeEntity type)
+        {
+
+            bool result = false;
+
+            if (string.IsNullOrEmpty(type.Extension))
+                throw new Exceptions.InvalidValueException(nameof(type.Extension));
+
+            string sql = @"UPDATE [dbo].[Type] SET [Name] = @name, [Extension]=@extension, [LastUpdate] = CURRENT_TIMESTAMP, [SecurityCoherence] = @newSecurityCoherenceType
+            WHERE [Id] = @id AND [SecurityCoherence]=@securityCoherence";
+
+            DbUpdateContext ctx = new DbUpdateContext()
+            {
+                Factory = _provider.Factory,
+            };
+            type.GenerateSave(ctx);
+            var p1 = _provider.CreateParameter("newSecurityCoherenceType", DbType.Guid, Guid.NewGuid());
+
+            result = _provider.Update(sql, ctx.Items.ToArray());
+
+            return result;
+
+        }
+
 
         public TypeEntity Read(Guid id)
         {
@@ -139,7 +157,22 @@ namespace Bb.OptionServer
 
         }
 
+        public IEnumerable<TypeEntity> ReadAll(Guid groupId)
+        {
+
+            string sql = @"SELECT [Id], [Name], [Extension], [GroupId], [CurrentVersionId], [LastUpdate], [SecurityCoherence] FROM [Options].[dbo].[Type] WHERE [GroupId]=@groupId";
+
+            var reader = _provider.Read<TypeEntity>(sql,
+                _provider.CreateParameter("groupId", DbType.Guid, groupId)
+                );
+
+            foreach (TypeEntity env in reader)
+                yield return env;
+
+        }
+
         private readonly SqlManager _provider;
         private readonly TypeVersionRepository _version;
+
     }
 }

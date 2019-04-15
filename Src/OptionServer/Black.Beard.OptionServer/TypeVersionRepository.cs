@@ -1,6 +1,8 @@
 ﻿using Bb.Entities;
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace Bb.OptionServer
 {
@@ -55,6 +57,33 @@ namespace Bb.OptionServer
             INSERT INTO [dbo].[TypeVersion] ([Id], [Version], [TypeId], [Contract], [Sha256], [LastUpdate], [SecurityCoherence]) 
             VALUES(@id, @version, @typeId, @contract, @sha256, CURRENT_TIMESTAMP, @securityCoherence)";
             _provider.Update(sql, ctx.Items.ToArray());
+
+        }
+
+        internal IEnumerable<TypeVersionEntity> ReadByGroupId(Guid groupId)
+        {
+            string sql = @"
+                SELECT 
+	                v.[Id],
+                    v.[LastUpdate],
+                    v.[Version],
+                    v.[TypeId],
+                    v.[Contract],
+                    v.[Sha256],
+                    v.[SecurityCoherence]
+                FROM [Options].[dbo].[Type] t
+                LEFT JOIN [Options].[dbo].[TypeVersion] v ON t.CurrentVersionId = v.Id
+                WHERE t.GroupId = @groupId
+";
+
+            var reader = _provider.Read<TypeVersionEntity>(sql, 
+                
+                _provider.CreateParameter("groupId", DbType.Guid, groupId)
+
+                );
+
+            foreach (TypeVersionEntity version in reader)
+                yield return version;
 
         }
 

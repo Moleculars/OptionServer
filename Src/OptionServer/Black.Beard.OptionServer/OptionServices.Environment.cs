@@ -45,7 +45,7 @@ namespace Bb
 
         public EnvironmentEntity Environment(Guid groupId, string name)
         {
-            var environment = _environments.Read(groupId, name);
+            var environment = Environments.Read(groupId, name);
             return environment;
         }
 

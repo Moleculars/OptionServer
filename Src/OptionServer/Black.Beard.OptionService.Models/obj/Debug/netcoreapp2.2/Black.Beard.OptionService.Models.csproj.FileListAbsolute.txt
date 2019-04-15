@@ -1,9 +1,0 @@
-D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionService.Models\bin\Debug\netcoreapp2.2\Black.Beard.OptionService.Models.deps.json
-D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionService.Models\bin\Debug\netcoreapp2.2\Black.Beard.OptionService.Models.dll
-D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionService.Models\bin\Debug\netcoreapp2.2\Black.Beard.OptionService.Models.pdb
-D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionService.Models\obj\Debug\netcoreapp2.2\Black.Beard.OptionService.Models.csprojAssemblyReference.cache
-D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionService.Models\obj\Debug\netcoreapp2.2\Black.Beard.OptionService.Models.csproj.CoreCompileInputs.cache
-D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionService.Models\obj\Debug\netcoreapp2.2\Black.Beard.OptionService.Models.AssemblyInfoInputs.cache
-D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionService.Models\obj\Debug\netcoreapp2.2\Black.Beard.OptionService.Models.AssemblyInfo.cs
-D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionService.Models\obj\Debug\netcoreapp2.2\Black.Beard.OptionService.Models.dll
-D:\Src\Moleculars\OptionServer\src\OptionServer\Black.Beard.OptionService.Models\obj\Debug\netcoreapp2.2\Black.Beard.OptionService.Models.pdb
