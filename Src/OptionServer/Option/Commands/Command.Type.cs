@@ -98,6 +98,7 @@ namespace Bb.Option.Commands
 
                     var _result = Helper.ConvertDataToShow(result.Result.Datas);
 
+                    PrintDataExtensions.ExtendedASCIIBorder();
                     ConvertToDatatable
                         .ConvertList(_result, "types")
                         .Print();
@@ -120,7 +121,7 @@ namespace Bb.Option.Commands
                     , ValidatorExtension.EvaluateRequired
                 );
 
-                var _contract = validator.OptionNoValue("-contract", 
+                var _contract = validator.OptionNoValue("-contract",
                     "want to show contract validation"
                     );
 
@@ -147,6 +148,7 @@ namespace Bb.Option.Commands
                     else
                     {
 
+                        PrintDataExtensions.ClearBorder();
                         ConvertToDatatable
                             .Convert(type, "type")
                             .PrintList();
@@ -195,7 +197,7 @@ namespace Bb.Option.Commands
                     var result = Client.Post<RootResultModel<TypeModel>>("api/type/updateExtension", model, GetToken());
                     result.Wait();
 
-                    Output.WriteLine($"extension of type {argTypeName.Value} is changed in group {result.Result.Datas.Groupname}.");
+                    Output.WriteLine($"extension of type {argTypeName.Value} in group {result.Result.Datas.Groupname} is changed to {argExtension.Value}.");
 
                     return 0;
 
@@ -205,19 +207,27 @@ namespace Bb.Option.Commands
             cmd.Command("contract", config =>
             {
 
-                config.Description = "update contract";
+                config.Description = "update contract. Becarefull, if you don't specify any option for contract, it is setted to emptys";
                 config.HelpOption(HelpFlag);
 
                 var validator = new GroupArgument(config, false);
 
                 var argTypeName = validator.Argument("typeName",
-                    "type name (this argument is required)"
+                    "type name (this argument is required)."
                     , ValidatorExtension.EvaluateRequired
                 );
 
-                var argContractFile = validator.Option("-fileContract",
-                    "filt that contains contract validator"
+                var argContractFile = validator.Option("-file",
+                    "file that contains contract validator"
                     , ValidatorExtension.EvaluateFileExist
+                );
+
+                var argContractText = validator.Option("-text",
+                    "text that contains contract validator"
+                );
+
+                var argContractText64 = validator.Option("-text64",
+                    "text encoded in base64 that contains contract validator"
                 );
 
                 config.OnExecute(() =>
@@ -230,15 +240,46 @@ namespace Bb.Option.Commands
                     if (validator.Evaluate() > 0)
                         return 2;
 
-                    var contract = Helper.LoadContentFromFile(argContractFile.Value());
+                    string contract = string.Empty;
 
-                    contract = contract.SerializeContract();
+                    if (argContractFile.HasValue())
+                        contract = Helper.LoadContentFromFile(argContractFile.Value());
+
+                    else if (argContractText.HasValue())
+                        contract = argContractText.Value();
+
+                    else if (argContractText64.HasValue())
+                    {
+
+                        contract = argContractText64.Value();
+                        byte[] array = new byte[0];
+                        try
+                        {
+                            array = Convert.FromBase64String(contract);
+                        }
+                        catch (System.Exception)
+                        {
+                            Output.ErrorWriteLine("contrat text is not valid base 64 text");
+                            return 1;
+                        }
+
+                        try
+                        {
+                            contract = Helper.LoadContentFromText(array);
+                        }
+                        catch (Exception)
+                        {
+                            Output.ErrorWriteLine("base 64 text is not valid encoded text");
+                            return 1;
+                        }
+
+                    }
 
                     var model = new TypeModel()
                     {
                         Groupname = Helper.Parameters.WorkingGroup,
                         TypeName = argTypeName.Value,
-                        Validator = contract,
+                        Validator = contract.SerializeContract(),
                     };
 
                     var result = Client.Post<RootResultModel<EnviromnentModel>>("api/type/updateContract", model, GetToken());
@@ -271,8 +312,14 @@ namespace Bb.Option.Commands
             Type = type.TypeName;
             Extension = type.Extension;
             Version = type.Version;
-            Sha256 = type.Sha256;
-            Contract = type.Validator.DeserializeContract().Replace("\r", "").Replace("\n", "").Take(15).ToString();
+
+            if (!string.IsNullOrEmpty(type.Validator))
+            {
+                Sha256 = type.Sha256;
+                var t = type.Validator.DeserializeContract().Replace("\r", "").Replace("\n", "").Take(15).ToArray();
+                Contract = string.Concat(t) + " ...";
+            }
+
         }
 
         public string Group { get; }

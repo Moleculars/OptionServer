@@ -19,10 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Exceptions\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Black.Beard.OptionService.Models\Black.Beard.OptionService.Models.csproj" />
     <ProjectReference Include="..\Black.Beard.Sdk.HttpClient\Black.Beard.Sdk.HttpClient.csproj" />
   </ItemGroup>

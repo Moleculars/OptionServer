@@ -59,10 +59,10 @@ namespace Bb.OptionServer
         {
 
             var indexByCurrentId = types.ToLookup(c => c.CurrentVersionId);
-            var groupIds = new HashSet<Guid>( types.Select(c => c.GroupId));
+            var groupIds = new HashSet<Guid>(types.Select(c => c.GroupId));
 
             foreach (Guid groupId in groupIds)
-                foreach (var version in this._version.ReadByGroupId(groupId))
+                foreach (var version in _version.ReadByGroupId(groupId))
                     if (indexByCurrentId.Contains(version.Id))
                         foreach (var item2 in indexByCurrentId[version.Id])
                             item2.Version = version;
@@ -119,8 +119,7 @@ namespace Bb.OptionServer
                 Factory = _provider.Factory,
             };
             type.GenerateSave(ctx);
-            var p1 = _provider.CreateParameter("newSecurityCoherenceType", DbType.Guid, Guid.NewGuid());
-
+            ctx.Items.Add(_provider.CreateParameter("newSecurityCoherenceType", DbType.Guid, Guid.NewGuid()));
             result = _provider.Update(sql, ctx.Items.ToArray());
 
             return result;

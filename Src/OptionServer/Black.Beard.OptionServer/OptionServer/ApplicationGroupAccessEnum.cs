@@ -22,17 +22,17 @@
         /// <summary>
         /// can add type item
         /// </summary>
-        Add = 4 | Write,
+        Add = 4 | Read | Write,
 
         /// <summary>
-        /// Can delete group
+        /// Can delete item
         /// </summary>
-        Delete = 8,
+        Delete = 8 | Add,
 
         /// <summary>
         /// is owner
         /// </summary>
-        Admin = Read | Add | Write | Delete,
+        Admin = 16 | Read | Add | Write | Delete,
 
     }
 

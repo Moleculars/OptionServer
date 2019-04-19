@@ -1,9 +1,11 @@
 ﻿using Bb.Http.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 
 namespace Bb.Option
@@ -54,15 +56,18 @@ namespace Bb.Option
             }
             else
             {
-                var _response1 = response.StatusCode.ToString();
-                throw new System.Net.WebException($"Request failed {response.StatusCode}");
+                var u = ThrowWebRequest(response);
+                if (u  != null)
+                    throw u;
             }
+
+            return default(T);
 
         }
 
         public async Task<T> Get<T>(string path, params (string, object)[] headers)
         {
-             Dictionary<string, object> _headers = new Dictionary<string, object>();
+            Dictionary<string, object> _headers = new Dictionary<string, object>();
             if (headers != null)
                 foreach (var item in headers)
                     _headers.Add(item.Item1, item.Item2);
@@ -89,19 +94,33 @@ namespace Bb.Option
                     return (T)(object)payloadResponse;
 
                 T result = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(payloadResponse);
-
                 StoreResponseHeaders(headers, response);
 
                 return result;
             }
             else
             {
-                var _response1 = response.StatusCode.ToString();
-                throw new System.Net.WebException($"Request failed {response.StatusCode}");
+                var u = ThrowWebRequest(response);
+                if (u  != null)
+                    throw u;
             }
+
+            return default(T);
 
         }
 
+
+
+        protected virtual Exception ThrowWebRequest(HttpResponseMessage response)
+        {            
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return new AuthenticationException();
+
+            var _response1 = response.StatusCode.ToString();
+            return new System.Net.WebException($"Request failed {response.StatusCode}");
+
+        }
 
         private static void StoreResponseHeaders(Dictionary<string, object> headers, HttpResponseMessage response)
         {

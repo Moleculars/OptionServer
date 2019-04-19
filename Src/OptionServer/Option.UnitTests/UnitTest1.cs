@@ -1,5 +1,7 @@
+using Bb.Option;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Diagnostics;
 
 namespace Option.UnitTests
 {
@@ -32,6 +34,8 @@ namespace Option.UnitTests
         public void TestCreateUser()
         {
 
+            Output.SetModeDebug();
+
             string username1 = "user" + Guid.NewGuid()
                 .ToString()
                 .Replace("{", "")
@@ -58,7 +62,7 @@ namespace Option.UnitTests
             Option.Program.Main(new string[] { "group", "add", "groupPar1" });
             Option.Program.Main(new string[] { "group", "list" });
 
-            Option.Program.Main(new string[] { "group", "grant", "groupPar1", username2, "-appli='Add'" });
+            Option.Program.Main(new string[] { "group", "grant", "groupPar1", username2, "-appli='Add'", "-type='Add'", "-env='Add'" });
             Option.Program.Main(new string[] { "user", "connect", username2, pass2 });
             Option.Program.Main(new string[] { "group", "list" });
 
@@ -73,15 +77,12 @@ namespace Option.UnitTests
             Option.Program.Main(new string[] { "type", "list" });
             Option.Program.Main(new string[] { "type", "extension", "typeJson", ".test.json" });
 
-            Option.Program.Main(new string[] { "type", "extension", "contract", "{ }" });
+            Option.Program.Main(new string[] { "type", "contract", "typeJson", "-text='abcd'" });
 
 
             Bb.Option.Helper.Parameters = null;
             Bb.Option.Helper.Load();
             Assert.AreEqual(Bb.Option.Helper.Parameters.Token != null, true);
-
-
-
 
         }
 

@@ -1,8 +1,9 @@
-﻿using System.Diagnostics;
+﻿using Bb.OptionService.Models;
 using Microsoft.AspNetCore.Mvc;
-using Bb.OptionService.Models;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System.Diagnostics;
 
-namespace Black.Beard.OptionService.Controllers
+namespace Bb.Controllers
 {
 
     public class HomeController : Controller
@@ -25,4 +26,5 @@ namespace Black.Beard.OptionService.Controllers
         }
 
     }
+
 }

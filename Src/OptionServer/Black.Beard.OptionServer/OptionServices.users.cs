@@ -24,6 +24,11 @@ namespace Bb
                 Pseudo = pseudo,
                 Email = email,
                 HashPassword = UserEntity.Hash(password),
+
+                AccessProfile = _users.IsEmpty() 
+                    ? UserProfileEnum.Administrator 
+                    : UserProfileEnum.Classical,
+
             };
 
             if (Users.Save(user))

@@ -71,6 +71,45 @@ namespace Bb.OptionServer
 
         }
 
+        public object ReadScalar(string sql, params DbParameter[] parameters)
+        {
+
+            bool initialized = false;
+            DbConnection cnx = null;
+
+            if (_cnx != null)
+                cnx = _cnx;
+            else
+            {
+                cnx = GetConnection();
+                cnx.Open();
+                initialized = true;
+            }
+
+            try
+            {
+
+                using (var cmd = GetCommand(sql, cnx))
+                {
+
+                    if (parameters != null)
+                        foreach (var parameter in parameters)
+                            cmd.Parameters.Add(parameter);
+
+                    return cmd.ExecuteScalar();
+
+                }
+
+            }
+            finally
+            {
+                if (initialized)
+                    cnx.Dispose();
+            }
+
+        }
+
+
         public bool Update(string sql, params DbParameter[] Items)
         {
             return Update(sql, Items.ToList());
@@ -78,7 +117,7 @@ namespace Bb.OptionServer
 
         public bool Update(string sql, List<DbParameter> Items)
         {
-            
+
             bool initialized = false;
             DbConnection cnx = null;
 

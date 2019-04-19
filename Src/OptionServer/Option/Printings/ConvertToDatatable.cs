@@ -34,7 +34,7 @@ namespace Bb.Option.Printings
             Type _type = rows.FirstOrDefault().GetType();
 
             var props = _type.GetProperties(BindingFlags.Instance | BindingFlags.Public).ToList();
-            List<PropertyInfo> members = (columns.Length > 0)
+            List<PropertyInfo> members = (columns.Length == 0)
                 ? props
                 : props.Where(c => columns.Contains(c.Name)).ToList();
 

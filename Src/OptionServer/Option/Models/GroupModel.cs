@@ -11,9 +11,20 @@ namespace Bb.Option.Models
             var c = result.Accesses[0];
             Group_Name = result.ApplicationGroupName;
             Username = string.Join(',', c.Username);
+
             Application_Accesses = string.Join(',', c.ApplicationAccesses);
             Environment_Accesses = string.Join(',', c.EnvironmentAccesses);
             Type_Accesses = string.Join(',', c.TypeAccesses);
+
+            if (string.IsNullOrEmpty(Application_Accesses))
+                Application_Accesses = "None";
+
+            if (string.IsNullOrEmpty(Environment_Accesses))
+                Environment_Accesses = "None";
+
+            if (string.IsNullOrEmpty(Type_Accesses))
+                Type_Accesses = "None";
+
         }
 
         public string Group_Name { get; internal set; }

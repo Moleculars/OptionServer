@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Bb.Option
 {
 
     public class Output
     {
+
+
+
+        private static bool _debug;
+
+        public static bool DebugModeActivated => _debug;
 
         internal static void Write(string message, params object[] args)
         {
@@ -31,31 +38,63 @@ namespace Bb.Option
             ErrorWriteLine(string.Empty);
         }
 
-
         internal static void WriteLine(string message)
         {
-            Console.WriteLine(message);
+
+            if (_debug)
+                Debug.WriteLine(message, TraceLevel.Info);
+
+            else
+                Console.WriteLine(message);
+
         }
 
         internal static void Write(string message)
         {
-            Console.Write(message);
+
+            if (_debug)
+                Debug.Write(message);
+
+            else
+                Console.Write(message);
+
         }
 
 
         internal static void ErrorWriteLine(string message)
         {
 
-            var c = Console.ForegroundColor;
+            if (_debug)
+                Debug.WriteLine(message, TraceLevel.Error);
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Error.WriteLine(message);
-            Console.ForegroundColor = c;
-
-            Console.Error.Flush();
+            else
+            {
+                var c = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Error.WriteLine(message);
+                Console.ForegroundColor = c;
+                Console.Error.Flush();
+            }
 
         }
 
+        internal static void Flush()
+        {
+            if (_debug)
+            {
+                Debug.Flush();
+            }
+            else
+            {
+                Console.Out.Flush();
+                Console.Error.Flush();
+            }
+        }
+
+        public static void SetModeDebug()
+        {
+            _debug = true;
+        }
 
     }
 

@@ -13,10 +13,7 @@ namespace Bb
         public TypeEntity GetType(string username, string groupName, string typeName)
         {
 
-            var group = GroupApplication(username, groupName).FirstOrDefault();
-
-            if (group == null)
-                throw new Exceptions.InvalidValueException($"{nameof(username)} or {nameof(groupName)}");
+            var group = CheckGroup(username, groupName, AccessEntityEnum.Read, objectKingEnum.Type);
 
             var o = Types.Read(group.ApplicationGroupId, typeName);
             if (o != null)
@@ -29,10 +26,7 @@ namespace Bb
         public List<TypeEntity> GetTypes(string username, string groupName)
         {
 
-            var group = GroupApplication(username, groupName).FirstOrDefault();
-
-            if (group == null)
-                throw new Exceptions.InvalidValueException($"{nameof(username)} or {nameof(groupName)}");
+            var group = CheckGroup(username, groupName, AccessEntityEnum.Read, objectKingEnum.Type);
 
             var o = Types.ReadAll(group.ApplicationGroupId).ToList();
 
@@ -45,10 +39,7 @@ namespace Bb
         public TypeEntity UpdateContract(string username, string groupName, string nameType, string contract)
         {
 
-            var group = GroupApplication(username, groupName).FirstOrDefault();
-
-            if (group == null)
-                throw new Exceptions.InvalidValueException($"{nameof(username)} or {nameof(groupName)}");
+            var group = CheckGroup(username, groupName, AccessEntityEnum.Write, objectKingEnum.Type);
 
             var type = Types.Read(group.ApplicationGroupId, nameType);
             if (type == null)
@@ -68,6 +59,8 @@ namespace Bb
 
                 Types.UpdateContract(type);
 
+                Types.ReadVersionsByGroupIds(new List<TypeEntity>() { type });
+
             }
 
 
@@ -81,10 +74,7 @@ namespace Bb
             if (!extension.StartsWith("."))
                 extension = "." + extension;
 
-            var group = GroupApplication(username, groupName).FirstOrDefault();
-
-            if (group == null)
-                throw new Exceptions.InvalidValueException($"{nameof(username)} or {nameof(groupName)}");
+            var group = CheckGroup(username, groupName, AccessEntityEnum.Write, objectKingEnum.Type);
 
             var type = Types.Read(group.ApplicationGroupId, nameType);
             if (type == null)
@@ -92,10 +82,11 @@ namespace Bb
 
             if (type.Extension != extension)
             {
-
                 type.Extension = extension;
                 Types.UpdateExtension(type);
             }
+
+            Types.ReadVersionsByGroupIds(new List<TypeEntity>() { type });
 
             return type;
 
@@ -104,10 +95,7 @@ namespace Bb
         public TypeEntity AddType(string username, string groupName, string name, string extension, string contract)
         {
 
-            var group = GroupApplication(username, groupName).FirstOrDefault();
-
-            if (group == null)
-                throw new Exceptions.InvalidValueException($"{nameof(username)} or {nameof(groupName)}");
+            var group = CheckGroup(username, groupName, AccessEntityEnum.Add, objectKingEnum.Type);
 
             var typeId = Guid.NewGuid();
             var id = Guid.NewGuid();
@@ -134,11 +122,11 @@ namespace Bb
 
         }
 
-        public TypeEntity Type(Guid groupId, string name)
-        {
-            var type = Types.Read(groupId, name);
-            return type;
-        }
+        //public TypeEntity Type(Guid groupId, string name)
+        //{
+        //    var type = Types.Read(groupId, name);
+        //    return type;
+        //}
 
         private TypeRepository Types => _types ?? (_types = new TypeRepository(_manager));
 

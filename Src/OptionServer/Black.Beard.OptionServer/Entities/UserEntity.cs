@@ -20,6 +20,8 @@ namespace Bb
 
         public string HashPassword { get; set; }
 
+        public UserProfileEnum AccessProfile { get; set; }
+
 
         public DateTimeOffset LastUpdate { get; set; }
 
@@ -33,6 +35,7 @@ namespace Bb
             Username = item.GetString(nameof(Username));
             Pseudo = item.GetString(nameof(Pseudo));
             Email = item.GetString(nameof(Email));
+            AccessProfile = (UserProfileEnum)(object)item.GetInt32(nameof(AccessProfile));
             HashPassword = item.GetString(nameof(HashPassword));
             LastUpdate = item.GetDateTime(nameof(LastUpdate));
             SecurityCoherence = item.GetGuid(nameof(SecurityCoherence));
@@ -47,6 +50,7 @@ namespace Bb
             item.CreateParameter(nameof(Pseudo), System.Data.DbType.String, Pseudo);
             item.CreateParameter(nameof(Email), System.Data.DbType.String, Email);
             item.CreateParameter(nameof(HashPassword), System.Data.DbType.String, HashPassword);
+            item.CreateParameter(nameof(AccessProfile), System.Data.DbType.Int32, (int)AccessProfile);
         }
 
 
@@ -64,5 +68,14 @@ namespace Bb
 
 
     }
+
+    public enum UserProfileEnum
+    {
+        Classical = 0,
+        Premium = 8,
+        Operator = 256,
+        Administrator = 4096 | Premium | Operator,
+    }
+
 
 }

@@ -1,4 +1,5 @@
-﻿using Bb.OptionServer;
+﻿using Bb.Controllers;
+using Bb.OptionServer;
 using Bb.OptionService.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,25 +25,19 @@ namespace Bb.OptionService.Controllers
         /// <param name="groupName">Name of the group.</param>
         /// <returns></returns>
         [HttpGet("add/{groupName}", Name = "applicationGroup.create")]
-        public IActionResult Create(string groupName)
+        public ActionResult<RootResultModel<GroupApplicationResult>> Create(string groupName)
         {
 
-            string username = GetUsername();
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized();
+            GroupApplicationResult execute(ControllerBase self, string username)
+            {
+                var groups = _service.CreateGroupApplication(username, groupName);
+                List<GroupApplicationResult> _dic = Converts(groups);
+                var result = _dic.FirstOrDefault();
+                return result;
 
-            var groups = _service.CreateGroupApplication(username, groupName);
-            List<GroupApplicationResult> _dic = Converts(groups);
+            }
 
-            return Ok
-                (
-                    new RootResultModel<GroupApplicationResult>()
-                    {
-                        Valid = true,
-                        Datas = _dic.FirstOrDefault(),
-                    }
-                );
-
+            return this.Execute(execute, true);
 
         }
 
@@ -52,24 +47,20 @@ namespace Bb.OptionService.Controllers
         /// <param name="groupName">Name of the group.</param>
         /// <returns></returns>
         [HttpGet("get/{groupName}", Name = "applicationGroup.get")]
-        public IActionResult Get(string groupName)
+        public ActionResult<RootResultModel<GroupApplicationResult>> Get(string groupName)
         {
 
-            string username = GetUsername();
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized();
+            GroupApplicationResult execute(ControllerBase self, string username)
+            {
 
-            var groups = _service.GroupApplication(username, groupName);
-            List<GroupApplicationResult> _items = Converts(groups);
+                var groups = _service.GroupApplication(username, groupName);
+                List<GroupApplicationResult> _items = Converts(groups);
+                var result = _items.FirstOrDefault();
+                return result;
 
-            return Ok
-            (
-                new RootResultModel<GroupApplicationResult>()
-                {
-                    Valid = true,
-                    Datas = _items.FirstOrDefault(),
-                }
-            );
+            }
+
+            return this.Execute(execute, true);
 
         }
 
@@ -78,24 +69,19 @@ namespace Bb.OptionService.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("list", Name = "applicationGroup.list")]
-        public IActionResult List()
+        public ActionResult<RootResultModel<List<GroupApplicationResult>>> List()
         {
 
-            string username = GetUsername();
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized();
+            List<GroupApplicationResult> execute(ControllerBase self, string username)
+            {
 
-            var groups = _service.GetGroupApplicationsForUser(username);
-            List<GroupApplicationResult> items = Converts(groups);
+                var groups = _service.GetGroupApplicationsForUser(username);
+                List<GroupApplicationResult> result = Converts(groups);
+                return result;
 
-            return Ok
-            (
-                new RootResultModel<List<GroupApplicationResult>>()
-                {
-                    Valid = true,
-                    Datas = items,
-                }
-            );
+            }
+
+            return this.Execute(execute, true);
 
         }
 
@@ -105,14 +91,10 @@ namespace Bb.OptionService.Controllers
         /// <param name="groupName">Name of the group.</param>
         /// <returns></returns>
         [HttpPost("access", Name = "applicationGroup.access")]
-        public IActionResult SetAccess(GrantModel model)
+        public ActionResult<RootResultModel<GroupApplicationResult>> SetAccess(GrantModel model)
         {
 
-            string username = GetUsername();
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized();
-
-            try
+            GroupApplicationResult execute(ControllerBase self, string username)
             {
 
                 var groups = _service.SetAccess(
@@ -124,32 +106,13 @@ namespace Bb.OptionService.Controllers
                     (AccessEntityEnum)(int)model.AccessEnvironment
                 );
 
-                GroupApplicationResult _items = Convert(groups);
+                GroupApplicationResult result = Convert(groups);
 
-                return Ok
-                (
-                    new RootResultModel<GroupApplicationResult>()
-                    {
-                        Valid = true,
-                        Datas = _items,
-                    }
-                );
-
+                return result;
 
             }
-            catch (System.Exception e)
-            {
 
-                var error = new RootResultModel<GroupApplicationResult>()
-                {
-                    Valid = true,
-                    Message = e.Message,
-                    Datas = null,
-                };
-
-                return BadRequest(error);
-
-            }
+            return this.Execute(execute, true);
 
         }
 
@@ -203,12 +166,6 @@ namespace Bb.OptionService.Controllers
 
             return _group;
 
-        }
-
-
-        private string GetUsername()
-        {
-            return User?.Identity.Name;
         }
 
         private readonly OptionServices _service;

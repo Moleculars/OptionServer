@@ -22,45 +22,13 @@ namespace Bb.Controllers
         public ActionResult<RootResultModel<EnviromnentModel>> Create([FromBody]EnviromnentModel model)
         {
 
-            if (!ModelState.IsValid)
-                return base.BadRequest(base.ModelState);
-
-            string username = GetUsername();
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized();
-
-            try
+            EnviromnentModel execute(ControllerBase self, string user)
             {
-
-                var env = _service.AddEnvironment(username, model.Groupname, model.EnvironmentName);
-
-                if (env != null)
-                    return Ok(new RootResultModel<EnviromnentModel>()
-                    {
-                        Valid = true,
-                        Datas = model
-                    });
-
-                else
-                    return BadRequest(
-                        new RootResultModel<EnviromnentModel>()
-                        {
-                            Valid = false,
-                            Message = "failed to create environment.",
-                        });
-
+                _service.AddEnvironment(user, model.Groupname, model.EnvironmentName);
+                return model;
             }
-            catch (AllreadyExistException)
-            {
-                return BadRequest(
-                    new RootResultModel<EnviromnentModel>()
-                    {
-                        Valid = false,
-                        Message = "environment allready exist.",
-                    }
-                    );
 
-            }
+            return this.Execute(execute, true);
 
         }
 
@@ -68,55 +36,15 @@ namespace Bb.Controllers
         public ActionResult<RootResultModel<List<EnviromnentModel>>> List(string groupName)
         {
 
-            if (!ModelState.IsValid)
-                return base.BadRequest(base.ModelState);
-
-            string username = GetUsername();
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized();
-
-            try
+            List<EnviromnentModel> execute(ControllerBase self, string username)
             {
-
                 var env = _service.GetEnvironments(username, groupName);
-
-                if (env != null)
-                    return Ok(new RootResultModel<List<EnviromnentModel>>()
-                    {
-                        Valid = true,
-                        Datas = env.Select(c => new EnviromnentModel() { Groupname = groupName, EnvironmentName = c.Name }).ToList()
-                    });
-
-                else
-                    return BadRequest(
-                        new RootResultModel<List<EnviromnentModel>>()
-                        {
-                            Valid = false,
-                            Message = "failed to get environments.",
-                        });
-
-            }
-            catch (AllreadyExistException)
-            {
-                return BadRequest
-                    (
-                        new RootResultModel<List<EnviromnentModel>>()
-                        {
-                            Valid = false,
-                            Message = "failed to get environments.",
-                        }
-                    );
-
+                var result = env.Select(c => new EnviromnentModel() { Groupname = groupName, EnvironmentName = c.Name }).ToList();
+                return result;
             }
 
+            return this.Execute(execute, true);
 
-
-        }
-
-
-        private string GetUsername()
-        {
-            return User?.Identity.Name;
         }
 
         private readonly OptionServices _service;

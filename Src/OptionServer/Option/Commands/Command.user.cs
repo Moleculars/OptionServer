@@ -107,9 +107,9 @@ namespace Bb.Option.Commands
                     try
                     {
 
-                        var result = Client.Post<string>("/api/user/connect", model);
+                        var result = Client.Post<RootResultModel<string>>("/api/user/connect", model);
                         result.Wait();
-                        Helper.Parameters.Token = result.Result;
+                        Helper.Parameters.Token = result.Result.Datas;
                         Helper.Parameters.TokenExpiration = DateTime.Now.AddMinutes(60);
                         Output.WriteLine($"{argUsername.Value} is connected");
                         Helper.Parameters.WorkingGroup = null;

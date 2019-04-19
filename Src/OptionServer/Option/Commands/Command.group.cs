@@ -1,4 +1,5 @@
 ﻿using Bb.Http.Helpers;
+using Bb.Option.Exceptions;
 using Bb.Option.Models;
 using Bb.Option.Printings;
 using Bb.Option.Validators;
@@ -50,7 +51,7 @@ namespace Bb.Option.Commands
                         Output.WriteLine($"working group setted on {Helper.Parameters.WorkingGroup}");
 
                         PrintDataExtensions.ClearBorder();
-                        ConvertToDatatable.Convert(new GroupModel(result.Result.Datas), "list of groups you can to use")
+                        ConvertToDatatable.Convert(new GroupModel(result.Result.Datas), "list of groups can to be used")
                         .PrintList();
 
                     }
@@ -125,7 +126,7 @@ namespace Bb.Option.Commands
             cmd.Command("list", config =>
             {
 
-                config.Description = "return list of application group thatB your privilege allow";
+                config.Description = "return the list of application group thatB your privilege allow";
                 config.HelpOption(HelpFlag);
 
                 config.OnExecute(() =>
@@ -140,7 +141,7 @@ namespace Bb.Option.Commands
 
                     PrintDataExtensions.ExtendedASCIIBorder();
                     ConvertToDatatable
-                        .ConvertList(_list, "list of groups you can to use")
+                        .ConvertList(_list, "list of groups can to be used")
                         .Print();
 
                     return 0;
@@ -186,7 +187,7 @@ namespace Bb.Option.Commands
                     );
 
                 var argAll = validator.Option("-all",
-                    "privilege on (type, envorinment, application) configuration in one specification. " + Command._access
+                    "privilege on (type, environment, application) configuration in one specification." + Command._access
                     , ValidatorExtension.EvaluateAccessEnum
                     );
 
@@ -295,10 +296,15 @@ namespace Bb.Option.Commands
 
         private static Dictionary<string, object> GetToken()
         {
+
+            if (Helper.Parameters.TokenExpiration < DateTime.Now)
+                throw new ExpiratedTokenException();
+
             return new
             {
                 authorization = Helper.Parameters.Token
             }.GetDictionnaryProperties(false);
+
         }
     }
 }

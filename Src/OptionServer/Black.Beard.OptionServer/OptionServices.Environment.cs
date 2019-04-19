@@ -13,10 +13,7 @@ namespace Bb
         public List<EnvironmentEntity> GetEnvironments(string username, string groupName)
         {
 
-            var group = GroupApplication(username, groupName).FirstOrDefault();
-
-            if (group == null)
-                throw new Exceptions.InvalidValueException($"{nameof(username)} or {nameof(groupName)}");
+            var group = CheckGroup(username, groupName, AccessEntityEnum.Read, objectKingEnum.Environment);
 
             return Environments.ReadAll(group.ApplicationGroupId).ToList();
 
@@ -25,10 +22,7 @@ namespace Bb
         public EnvironmentEntity AddEnvironment(string username, string groupName, string name)
         {
 
-            var group = GroupApplication(username, groupName).FirstOrDefault();
-
-            if (group == null)
-                throw new Exceptions.InvalidValueException($"{nameof(username)} or {nameof(groupName)}");
+            var group = CheckGroup(username, groupName, AccessEntityEnum.Add, objectKingEnum.Environment);
 
             var env = new EnvironmentEntity()
             {
