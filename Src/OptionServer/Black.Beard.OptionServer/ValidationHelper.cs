@@ -1,8 +1,8 @@
-﻿using Bb.Exceptions;
+﻿using Bb.OptionServer.Exceptions;
 using System;
 using System.Text.RegularExpressions;
 
-namespace Bb
+namespace Bb.OptionServer
 {
     public static class ValidationHelper
     {

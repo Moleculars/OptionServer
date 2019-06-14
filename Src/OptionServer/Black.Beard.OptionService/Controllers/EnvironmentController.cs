@@ -1,4 +1,4 @@
-﻿using Bb.Exceptions;
+﻿using Bb.OptionServer;
 using Bb.OptionService.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,8 +22,9 @@ namespace Bb.Controllers
         public ActionResult<RootResultModel<EnviromnentModel>> Create([FromBody]EnviromnentModel model)
         {
 
-            EnviromnentModel execute(ControllerBase self, string user)
+            EnviromnentModel execute(ControllerBase self, string username)
             {
+                var user = _service.User(username);
                 _service.AddEnvironment(user, model.Groupname, model.EnvironmentName);
                 return model;
             }
@@ -38,8 +39,14 @@ namespace Bb.Controllers
 
             List<EnviromnentModel> execute(ControllerBase self, string username)
             {
-                var env = _service.GetEnvironments(username, groupName);
-                var result = env.Select(c => new EnviromnentModel() { Groupname = groupName, EnvironmentName = c.Name }).ToList();
+                var user = _service.User(username);
+                var group = _service.LoadEnvironments(user, groupName);
+                var result = group.GetEnvironments().Select(c => 
+                new EnviromnentModel()
+                {
+                    Groupname = group.FullName,
+                    EnvironmentName = c.EnvironmentName
+                }).ToList();
                 return result;
             }
 

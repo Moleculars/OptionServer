@@ -1,7 +1,7 @@
 ﻿using Bb.OptionServer;
 using System;
 
-namespace Bb
+namespace Bb.Entities
 {
 
     public class Entity : OptionServer.IMapperDbDataReader

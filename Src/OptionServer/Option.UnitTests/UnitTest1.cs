@@ -1,7 +1,6 @@
 using Bb.Option;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Diagnostics;
 
 namespace Option.UnitTests
 {
@@ -36,27 +35,15 @@ namespace Option.UnitTests
 
             Output.SetModeDebug();
 
-            string username1 = "user" + Guid.NewGuid()
-                .ToString()
-                .Replace("{", "")
-                .Replace("}", "")
-                .Split('-')[0]
-                ;
+            string username1 = GetUsername();
+            string username2 = GetUsername();
             string pass1 = Guid.NewGuid().ToString();
-
-
-            string username2 = "user" + Guid.NewGuid()
-                .ToString()
-                .Replace("{", "")
-                .Replace("}", "")
-                .Split('-')[0]
-                ;
-
             string pass2 = Guid.NewGuid().ToString();
 
+
             Option.Program.Main(new string[] { "server", "https://localhost:5001" });
-            Option.Program.Main(new string[] { "user", "add", username1, pass1, "pseudo1", "email1@yopmail.com" });
-            Option.Program.Main(new string[] { "user", "add", username2, pass2, "pseudo1", "email2@yopmail.com" });
+            Option.Program.Main(new string[] { "user", "add", username1, pass1, GetEmail(), GetPseudo() });
+            Option.Program.Main(new string[] { "user", "add", username2, pass2, GetEmail(), GetPseudo() });
             Option.Program.Main(new string[] { "user", "connect", username1, pass1 });
 
             Option.Program.Main(new string[] { "group", "add", "groupPar1" });
@@ -69,9 +56,14 @@ namespace Option.UnitTests
             Option.Program.Main(new string[] { "user", "connect", username1, pass1 });
             Option.Program.Main(new string[] { "group", "set", "groupPar1" });
 
+
+            Option.Program.Main(new string[] { "appli", "add", "appli1" });
+            Option.Program.Main(new string[] { "appli", "list" });
+
+
             Option.Program.Main(new string[] { "env", "add", "debug" });
             Option.Program.Main(new string[] { "env", "list" });
-            
+
             Option.Program.Main(new string[] { "type", "add", "typeJson", ".json" });
 
             Option.Program.Main(new string[] { "type", "list" });
@@ -84,6 +76,33 @@ namespace Option.UnitTests
             Bb.Option.Helper.Load();
             Assert.AreEqual(Bb.Option.Helper.Parameters.Token != null, true);
 
+        }
+
+        private static string GetEmail()
+        {
+            return Guid.NewGuid().ToString()
+                            .Replace("{", "")
+                            .Replace("}", "")
+                            .Split('-')[0]
+                            + "@yopmail.com"
+                            ;
+        }
+
+
+        private static string GetUsername()
+        {
+            return "u_" + Guid.NewGuid().ToString()
+                            .Replace("{", "")
+                            .Replace("}", "")
+                            .Split('-')[0];
+        }
+
+        private static string GetPseudo()
+        {
+            return "p_" + Guid.NewGuid().ToString()
+                            .Replace("{", "")
+                            .Replace("}", "")
+                            .Split('-')[0];
         }
 
     }

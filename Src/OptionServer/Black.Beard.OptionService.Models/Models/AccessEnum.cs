@@ -5,15 +5,10 @@
     public class GrantModel
     {
         public string User { get; set; }
-
         public string GroupName { get; set; }
-
         public AccessModuleEnum AccessApplication { get; set; }
-
         public AccessModuleEnum AccessType { get; set; }
-
         public AccessModuleEnum AccessEnvironment { get; set; }
-
     }
 
 
@@ -31,25 +26,31 @@
         Read = 1,
 
         /// <summary>
-        /// can add type item
+        /// can list
         /// </summary>
-        Write = 2 | Read,
+        List = 2 | Read,
 
         /// <summary>
         /// can add type item
         /// </summary>
-        Add = 4 | Write,
+        Write = 4 | Read,
 
         /// <summary>
-        /// Can delete group
+        /// can add type item
         /// </summary>
-        Delete = 8,
+        Add = 8 | List | Write,
+
+        /// <summary>
+        /// Can delete item
+        /// </summary>
+        Delete = 16 | Add,
 
         /// <summary>
         /// is owner
         /// </summary>
-        Admin = Read | Add | Write | Delete,
+        Owner = 32 | Read | Add | Write | Delete,
 
     }
+
 
 }

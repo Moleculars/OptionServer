@@ -108,6 +108,41 @@ namespace Bb.Option.Commands
                 });
             });
 
+            cmd.Command("listext", config =>
+            {
+
+                config.Description = "list all types of configuration when extension is equal for working group is setted";
+                config.HelpOption(HelpFlag);
+
+                var validator = new GroupArgument(config, false);
+
+                var argTypeName = validator.Argument("extension",
+                    "extension of the file that contains the configuration content (this argument is required)"
+                    , ValidatorExtension.EvaluateRequired
+                );
+
+                config.OnExecute(() =>
+                {
+
+                    var r = ValidatorExtension.EvaluateGroupName();
+                    if (r > 0)
+                        return r;
+
+                    var result = Client.Get<RootResultModel<List<TypeModel>>>($"api/type/extension/{Helper.Parameters.WorkingGroup}/{argTypeName.Value}", GetToken());
+                    result.Wait();
+
+                    var _result = Helper.ConvertDataToShow(result.Result.Datas);
+
+                    PrintDataExtensions.ExtendedASCIIBorder();
+                    ConvertToDatatable
+                        .ConvertList(_result, "types")
+                        .Print();
+
+                    return 0;
+
+                });
+            });
+
             cmd.Command("get", config =>
             {
 
@@ -214,6 +249,7 @@ namespace Bb.Option.Commands
 
                 var argTypeName = validator.Argument("typeName",
                     "type name (this argument is required)."
+                    , ValidatorExtension.EvaluateName
                     , ValidatorExtension.EvaluateRequired
                 );
 

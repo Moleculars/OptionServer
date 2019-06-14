@@ -9,6 +9,10 @@
     <StartupObject>Bb.OptionService.Program</StartupObject>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Controllers\ConfigurationController.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />

@@ -32,6 +32,8 @@ namespace Bb.Option.Commands
                 var argenvironmentName = validator.Argument("environmentName",
                     "environment name (this argument is required)"
                     , ValidatorExtension.EvaluateRequired
+                    , ValidatorExtension.EvaluateName
+
                 );
 
                 config.OnExecute(() =>

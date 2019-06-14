@@ -1,136 +1,179 @@
-﻿using Bb.OptionServer;
+﻿using Bb.OptionServer.Entities;
+using Bb.OptionServer;
+using Bb.OptionServer.Repositories.Tables;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Bb
+namespace Bb.OptionServer
 {
 
     public partial class OptionServices
     {
 
-
-        public TypeEntity GetType(string username, string groupName, string typeName)
-        {
-
-            var group = CheckGroup(username, groupName, AccessEntityEnum.Read, objectKingEnum.Type);
-
-            var o = Types.Read(group.ApplicationGroupId, typeName);
-            if (o != null)
-                Types.ReadVersionsByGroupIds(new List<TypeEntity>() { o });
-
-            return o;
-
-        }
-
-        public List<TypeEntity> GetTypes(string username, string groupName)
-        {
-
-            var group = CheckGroup(username, groupName, AccessEntityEnum.Read, objectKingEnum.Type);
-
-            var o = Types.ReadAll(group.ApplicationGroupId).ToList();
-
-            Types.ReadVersionsByGroupIds(o);
-
-            return o;
-
-        }
-
-        public TypeEntity UpdateContract(string username, string groupName, string nameType, string contract)
-        {
-
-            var group = CheckGroup(username, groupName, AccessEntityEnum.Write, objectKingEnum.Type);
-
-            var type = Types.Read(group.ApplicationGroupId, nameType);
-            if (type == null)
-                throw new Exceptions.InvalidValueException($"{nameof(nameType)}");
-
-            if (type.Version.Contract != contract)
-            {
-                var id = Guid.NewGuid();
-                type.Version = new Entities.TypeVersionEntity()
-                {
-                    Id = id,
-                    TypeId = type.Id,
-                    Contract = contract,
-                    Sha256 = string.IsNullOrEmpty(contract) ? string.Empty : Entities.TypeVersionEntity.Sha256_hash(contract),
-                    Version = 0,
-                };
-
-                Types.UpdateContract(type);
-
-                Types.ReadVersionsByGroupIds(new List<TypeEntity>() { type });
-
-            }
-
-
-            return type;
-
-        }
-
-        public TypeEntity UpdateExtension(string username, string groupName, string nameType, string extension)
+        public TypeEntity AddType(UserEntity user, string groupName, string name, string extension, string contract)
         {
 
             if (!extension.StartsWith("."))
                 extension = "." + extension;
 
-            var group = CheckGroup(username, groupName, AccessEntityEnum.Write, objectKingEnum.Type);
+            if (string.IsNullOrEmpty(contract))
+                contract = "_";
 
-            var type = Types.Read(group.ApplicationGroupId, nameType);
-            if (type == null)
-                throw new Exceptions.InvalidValueException($"{nameof(nameType)}");
-
-            if (type.Extension != extension)
-            {
-                type.Extension = extension;
-                Types.UpdateExtension(type);
-            }
-
-            Types.ReadVersionsByGroupIds(new List<TypeEntity>() { type });
-
-            return type;
-
-        }
-
-        public TypeEntity AddType(string username, string groupName, string name, string extension, string contract)
-        {
-
-            var group = CheckGroup(username, groupName, AccessEntityEnum.Add, objectKingEnum.Type);
+            var path = user.ResolveGroup(groupName);
+            var group = user.CheckGroup(path, AccessEntityEnum.Operator, objectKingEnum.Type);
 
             var typeId = Guid.NewGuid();
             var id = Guid.NewGuid();
-            var type = new TypeEntity()
-            {
-                Id = typeId,
-                GroupId = group.ApplicationGroupId,
-                Name = name,
-                CurrentVersionId = id,
-                Extension = extension,
-                Version = new Entities.TypeVersionEntity()
-                {
-                    Id = id,
-                    TypeId = typeId,
-                    Contract = contract,
-                    Sha256 = string.IsNullOrEmpty(contract) ? string.Empty : Entities.TypeVersionEntity.Sha256_hash(contract),
-                    Version = 0,
-                }
-            };
 
-            Types.Insert(type);
+            var type = new TypeTable();
+            type.Id.Value = Guid.NewGuid();
+            type.GroupId.Value = group.GroupId;
+            type.Name.Value = name;
+            type.Extension.Value = extension;
+            type.SecurityCoherence.Value = Guid.NewGuid();
+
+            var version = new TypeVersionTable();
+            version.Id.Value = Guid.NewGuid();
+            version.SecurityCoherence.Value = Guid.NewGuid();
+            version.TypeId.Value = type.Id;
+            version.Version.Value = 1;
+            version.Contract.Value = contract;
+            version.Sha256.Value = string.IsNullOrEmpty(contract) ? string.Empty : Sha.Sha256_hash(contract);
+
+            using (var trans = Types.Dto.Sql.GetTransaction())
+            {
+                Types.Insert(type);
+                TypeVersions.Insert(version);
+                type.CurrentVersionId.Value = version.Id;
+                Types.Update(type);
+                trans.Commit();
+            }
+
+            return GetType(user, groupName, name);
+
+        }
+
+        public TypeEntity GetType(UserEntity user, string groupName, string typeName)
+        {
+
+            var path = user.ResolveGroup(groupName);
+            var group = user.CheckGroup(path, AccessEntityEnum.Reader, objectKingEnum.Type);
+
+            if (!group.TypesAreLoaded)
+                Types.LoadTypesForUser(user);
+
+            TypeEntity type = group.GetType(typeName);
 
             return type;
 
         }
 
-        //public TypeEntity Type(Guid groupId, string name)
+        public TypeEntity UpdateExtension(UserEntity user, string groupName, string nameType, string extension)
+        {
+
+            if (!extension.StartsWith("."))
+                extension = "." + extension;
+
+            var path = user.ResolveGroup(groupName);
+            var group = user.CheckGroup(path, AccessEntityEnum.Operator, objectKingEnum.Type);
+            TypeEntity type = group.GetType(nameType);
+            if (type == null)
+            {
+                type = GetType(user, groupName, nameType);
+
+                if (type == null)
+                    throw new Exceptions.InvalidValueException($"{nameof(nameType)}");
+
+            }
+
+            if (type.Extension != extension)
+            {
+                var t = new TypeTable(type.TypeId, type.TypeName, type.Extension, type.Group.GroupId, type.CurrentVersion.Id, type.SecurityCoherence);
+                t.Extension.Value = extension;
+                if (Types.UpdateExtension(t))
+                {
+                    type.SecurityCoherence = type.SecurityCoherence;
+                    type.Extension = extension;
+                }
+            }
+
+            return type;
+
+        }
+
+        public TypeEntity UpdateContract(UserEntity user, string groupName, string nameType, string contract)
+        {
+
+            var path = user.ResolveGroup(groupName);
+            var group = user.CheckGroup(path, AccessEntityEnum.Operator, objectKingEnum.Type);
+            TypeEntity type = group.GetType(nameType);
+            if (type == null)
+            {
+
+                type = GetType(user, groupName, nameType);
+
+                if (type == null)
+                    throw new Exceptions.InvalidValueException($"{nameof(nameType)}");
+
+            }
+
+            var sha256 = Sha.Sha256_hash(contract);
+            if (type.CurrentVersion.Sha256 != sha256)
+            {
+
+                var t2 = new TypeVersionTable(Guid.NewGuid(), type.CurrentVersion.Version + 1, type.TypeId, contract, sha256, Guid.NewGuid());
+                var t1 = new TypeTable(type.TypeId, type.TypeName, type.Extension, type.Group.GroupId, type.CurrentVersion.Id, type.SecurityCoherence);
+
+                t1.CurrentVersionId.Value = t2.Id;
+                using (var trans = Types.Dto.Sql.GetTransaction(false))
+                    if (TypeVersions.Insert(t2))
+                        if (Types.Update(t1))
+                        {
+                            trans.Commit();
+
+                            type.SecurityCoherence = t1.SecurityCoherence.Value;
+                            type.CurrentVersion.Id = t2.Id;
+                            type.SecurityCoherence = t2.SecurityCoherence.Value;
+                            type.CurrentVersion.Contract = contract;
+                            type.CurrentVersion.Sha256 = sha256;
+
+                        }
+
+            }
+
+            return type;
+
+
+        }
+
+        public void LoadTypesHistory(UserEntity user)
+        {
+            foreach (var group in user.Groups())
+                TypeVersions.LoadTypesHistory(group);
+
+        }
+
+        public void LoadTypesHistory(GroupEntity group)
+        {
+
+            TypeVersions.LoadTypesHistory(group);
+        }
+
+        //public List<TypeEntity> GetTypes(UserEntity user, string groupName)
         //{
-        //    var type = Types.Read(groupId, name);
-        //    return type;
+
+        //    var path = user.ResolveGroupApplication(groupName);
+        //    var group = user.CheckGroup(path, AccessEntityEnum.List, objectKingEnum.Type);
+
+        //    var o = Types.ReadAllForGroup(group.GroupId);
+
+        //    Types.ReadVersionsByGroupIds(o);
+
+        //    return o;
+
         //}
 
-        private TypeRepository Types => _types ?? (_types = new TypeRepository(_manager));
 
-        private TypeRepository _types;
+
 
 
     }

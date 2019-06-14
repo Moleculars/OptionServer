@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bb.Exceptions
+namespace Bb.OptionServer.Exceptions
 {
 
     [Serializable]

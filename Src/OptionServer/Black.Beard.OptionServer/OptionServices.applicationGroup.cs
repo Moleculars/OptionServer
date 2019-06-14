@@ -1,93 +1,113 @@
-﻿//using Bb.OptionServer;
-
-using Bb.Exceptions;
-using Bb.OptionServer;
-using System.Collections.Generic;
+﻿using Bb.OptionServer.Entities;
+using Bb.OptionServer.Exceptions;
+using Bb.OptionServer.Repositories.Tables;
+using System;
 using System.Linq;
 
-namespace Bb
+namespace Bb.OptionServer
 {
 
     public partial class OptionServices
     {
 
-
-        public ApplicationGroupAccessEntity SetAccess(string usernameOnwer, string usernameToGrant, string fullGroupname, AccessEntityEnum accessApplication, AccessEntityEnum accessType, AccessEntityEnum accessEnvironment)
+        public UserEntity CreateGroupApplication(UserEntity user, string groupName)
         {
 
-            if (!fullGroupname.StartsWith(usernameOnwer + "."))
-                fullGroupname = $"{usernameOnwer}.{fullGroupname}";
+            var group1 = ApplicationGroups.GetByName(user.Id, groupName);
+            if (group1 != null)
+                throw new AllreadyExistException($"{user.Pseudo}.{groupName}");
 
-            var userOwner = Users.Read(usernameOnwer) ?? throw new MissingUserException(usernameOnwer);
-            var userToGrant = Users.Read(usernameToGrant) ?? throw new MissingUserException(usernameToGrant);
+            var group = new ApplicationGroupTable();
+            group.Id.Value = Guid.NewGuid();
+            group.Name.Value = groupName;
+            group.OwnerUserId.Value = user.Id;
+            group.SecurityCoherence.Value = Guid.NewGuid();
+            group.LastUpdate.Value = DateTimeOffset.Now;
 
-            var repGroup = ApplicationGroups;
+            var groupAccess = new ApplicationGroupAccessTable();
+            groupAccess.AccessApplication.Value = (int)AccessEntityEnum.Owner;
+            groupAccess.AccessEnvironment.Value = (int)AccessEntityEnum.Owner;
+            groupAccess.AccessType.Value = (int)AccessEntityEnum.Owner;
+            groupAccess.ApplicationGroupId.Value = group.Id;
+            groupAccess.UserId.Value = user.Id;
+            groupAccess.SecurityCoherence.Value = Guid.NewGuid();
+            groupAccess.LastUpdate.Value = DateTimeOffset.Now;
 
-            repGroup.SetAccess(userOwner.Id, userToGrant.Id, fullGroupname, accessApplication, accessType, accessEnvironment);
-            var grp4 = repGroup.GetAccessByGoupApplicationName(userToGrant.Id, fullGroupname).FirstOrDefault();
-
-            return grp4;
-
-        }
-
-        /// <summary>
-        /// Groups the applications.
-        /// </summary>
-        /// <param name="username">The username.</param>
-        /// <param name="groupName">Name of the group.</param>
-        /// <returns></returns>
-        public List<ApplicationGroupAccessEntity> GroupApplication(string username, string groupName)
-        {
-
-            if (!groupName.StartsWith(username + "."))
-                groupName = $"{username}.{groupName}";
-
-            var user = Users.Read(username) ?? throw new MissingUserException(username);
-            var repository = ApplicationGroups;
-
-            var result = repository.GetAccessByGoupApplicationName(user.Id, groupName);
-
-            return result;
-
-        }
-
-        public List<ApplicationGroupAccessEntity> GetGroupApplicationsForUser(string username)
-        {
-            var user = User(username) ?? throw new MissingUserException(username);
-            var repository = ApplicationGroups;
-            var result = repository.GetAccessesByForUser(user.Id);
-            return result;
-        }
-
-        public List<ApplicationGroupAccessEntity> CreateGroupApplication(string username, string groupName)
-        {
-
-            if (!groupName.StartsWith(username + "."))
-                groupName = $"{username}.{groupName}";
-
-            var repository = ApplicationGroups;
-
-            var user = User(username) ?? throw new MissingUserException(username);
-
-            var group1 = repository.GetByname(username, groupName);
-            if (group1 != null && group1.Count > 1)
-                throw new Exceptions.AllreadyExistException($"{username}.{groupName}");
-
-            var result = repository.Create(user.Id, groupName);
-            if (result)
+            using (var trans = ApplicationGroups.Dto.Sql.GetTransaction())
             {
-                var access = repository.GetAccessByGoupApplicationName(user.Id, groupName);
-                return access;
+
+                var r = ApplicationGroups.Insert(group)
+                        ? ApplicationGroupAccess.Insert(groupAccess)
+                        : false
+                        ;
+
+                trans.Commit();
+
             }
 
-            return null;
+            var grp = User(user.Id);
+
+            return grp;
 
         }
 
-        private ApplicationGroupRepository ApplicationGroups => _applicationGroups ?? (_applicationGroups = new ApplicationGroupRepository(_manager));
-        private ApplicationGroupRepository _applicationGroups;
+        public UserEntity SetAccess(UserEntity user, UserEntity userToGrant, string fullGroupname, AccessEntityEnum accessApplication, AccessEntityEnum accessType, AccessEntityEnum accessEnvironment)
+        {
+
+            var path = user.ResolveGroup(fullGroupname)
+                ;
+
+            if (path.Owner.OwnerUserId != Guid.Empty && path.Owner.OwnerUserId != user.Id)
+                throw new NotEnoughtRightException(fullGroupname);
+
+            var g1 = userToGrant.Groups(path.Group.Name).FirstOrDefault();
+            if (g1 != null)
+            {
+
+                var g2 = new ApplicationGroupAccessTable();
+                g2.ApplicationGroupId.Value = g1.GroupId;
+                g2.UserId.Value = userToGrant.Id;
+                g2.SecurityCoherence.Value = g1.SecurityCoherence;
+                g2.AccessApplication.Value = (int)g1.ApplicationAccess;
+                g2.AccessEnvironment.Value = (int)g1.EnvironmentAccess;
+                g2.AccessType.Value = (int)g1.TypeAccess;
+                g2.Reset();
+
+                g2.AccessApplication.Value = (int)accessApplication;
+                g2.AccessEnvironment.Value = (int)accessEnvironment;
+                g2.AccessType.Value = (int)accessType;
+
+                ApplicationGroupAccess.Update(g2);
+            }
+            else
+            {
+
+                var g3 = new ApplicationGroupAccessTable();
+                g3.ApplicationGroupId.Value = path.Group.Infos.GroupId;
+                g3.UserId.Value = userToGrant.Id;
+
+                g3.SecurityCoherence.Value = Guid.NewGuid();
+
+                g3.AccessApplication.Value = (int)accessApplication;
+                g3.AccessEnvironment.Value = (int)accessEnvironment;
+                g3.AccessType.Value = (int)accessType;
+
+
+                ApplicationGroupAccess.Insert(g3);
+
+            }
+
+            var grp = User(userToGrant.Id);
+
+            return grp;
+
+        }
 
     }
 
 
 }
+
+
+
+

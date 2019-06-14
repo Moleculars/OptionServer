@@ -1,4 +1,4 @@
-﻿using Bb.Exceptions;
+﻿using Bb.OptionServer.Exceptions;
 using Bb.OptionService.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;

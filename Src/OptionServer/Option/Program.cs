@@ -26,6 +26,8 @@ namespace Option
                     .CommandGroup()
                     .CommandEnvironment()
                     .CommandType()
+                    .CommandApplication()
+                    .CommandConfiguration()
                 ;
 
                 if (Output.DebugModeActivated)

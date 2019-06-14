@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bb.Exceptions
+namespace Bb.OptionServer.Exceptions
 {
     [Serializable]
     public class InvalidValueException : Exception

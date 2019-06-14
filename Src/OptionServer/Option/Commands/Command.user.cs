@@ -1,5 +1,4 @@
-﻿using Bb.Option;
-using Bb.Option.Validators;
+﻿using Bb.Option.Validators;
 using Bb.OptionService.Models;
 using Microsoft.Extensions.CommandLineUtils;
 using System;
@@ -15,7 +14,7 @@ namespace Bb.Option.Commands
             var cmd = app.Command("user", config =>
             {
 
-                config.Description = "create, lock, unlock, connect user";                
+                config.Description = "create, lock, unlock, connect user";
                 config.HelpOption(HelpFlag);
 
             });
@@ -29,7 +28,7 @@ namespace Bb.Option.Commands
                 var validator = new GroupArgument(config, false);
 
                 var argUsername = validator.Argument("username",
-                    "username of user. (this argument is required)"
+                    "username of user. used to connect on system (this argument is required)"
                     , ValidatorExtension.EvaluateRequired
                 );
 
@@ -38,14 +37,13 @@ namespace Bb.Option.Commands
                     , ValidatorExtension.EvaluateRequired
                 );
 
-                var argPseudo = validator.Argument("pseudo",
-                    "pseudo of the new user. (this argument is required)"
-                    , ValidatorExtension.EvaluateRequired
-                );
-
                 var argEmail = validator.Argument("email",
                     "email of the new user. (this argument is required)"
                     , ValidatorExtension.EvaluateRequired
+                );
+
+                var argPseudo = validator.Argument("pseudo",
+                    "pseudo of the user. The pseudo is used to prefix working group. By security it can't be same that username. (if this argument is missing the left email part is used)"
                 );
 
                 config.OnExecute(() =>
@@ -54,11 +52,26 @@ namespace Bb.Option.Commands
                     if (validator.Evaluate() > 0)
                         return 2;
 
+                    string pseudo = argPseudo.Value;
+
+                    if (string.IsNullOrEmpty(pseudo))
+                    {
+                        pseudo = argEmail.Value.Split('@')[0];
+                        Output.WriteLine($"the pseudo is empty, the left email part is used. {pseudo}");
+                    }
+
+                    if (argUsername.Value == argPseudo.Value)
+                    {
+                        Output.ErrorWriteLine("the username and pseudo can't be same.");
+                        return 2;
+                    }
+
+
                     var model = new CreateUserInputModel()
                     {
                         Login = argUsername.Value,
                         Password = argPassword.Value,
-                        Pseudo = argPseudo.Value,
+                        Pseudo = pseudo,
                         Mail = argEmail.Value
                     };
 
@@ -80,11 +93,11 @@ namespace Bb.Option.Commands
 
                 var validator = new GroupArgument(config, false);
 
-                 var argUsername = validator.Argument(
-                    "username",
-                    "username of user. (this argument is required)"
-                    , ValidatorExtension.EvaluateRequired
-                );
+                var argUsername = validator.Argument(
+                   "username",
+                   "username of user. (this argument is required)"
+                   , ValidatorExtension.EvaluateRequired
+               );
 
                 var argPassword = validator.Argument(
                     "password",

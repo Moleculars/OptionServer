@@ -2,7 +2,36 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>Bb</RootNamespace>
+    <RootNamespace>Bb.OptionServer</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="OptionServer\**" />
+    <EmbeddedResource Remove="OptionServer\**" />
+    <None Remove="OptionServer\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="ApplicationGroupRepository.cs" />
+    <Compile Remove="ApplicationRepository.cs" />
+    <Compile Remove="ConfigurationRepository.cs" />
+    <Compile Remove="Entities\ApplicationAccessEntity.cs" />
+    <Compile Remove="Entities\ApplicationConfigurationAccessEntity.cs" />
+    <Compile Remove="Entities\ApplicationConfigurationEntity.cs" />
+    <Compile Remove="Entities\ApplicationGroupEntity.cs" />
+    <Compile Remove="Entities\Entity.cs" />
+    <Compile Remove="EnvironmentRepository.cs" />
+    <Compile Remove="TypeRepository.cs" />
+    <Compile Remove="TypeVersionRepository.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Scripts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Black.Beard.OptionServer.Dao\Black.Beard.OptionServer.Dao.csproj" />
+    <ProjectReference Include="..\Black.Beard.Security.Bearer\Black.Beard.Security.Bearer.csproj" />
+  </ItemGroup>
 
 </Project>

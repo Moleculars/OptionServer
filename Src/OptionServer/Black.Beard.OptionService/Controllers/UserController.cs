@@ -1,4 +1,6 @@
-﻿using Bb.OptionService.Models;
+﻿using Bb.OptionServer;
+using Bb.OptionServer.Repositories.Tables;
+using Bb.OptionService.Models;
 using Bb.Security.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +27,7 @@ namespace Bb.Controllers
             UserCreatedResultModel execute(ControllerBase self, string username)
             {
 
-                UserEntity auth = _service.AddUser(user.Login, user.Password, user.Mail, user.Pseudo);
+                UsersTable auth = _service.AddUser(user.Login, user.Password, user.Mail, user.Pseudo);
                 var result = new UserCreatedResultModel()
                 {
                     Id = auth.Id,
@@ -50,21 +52,8 @@ namespace Bb.Controllers
                 if (!string.IsNullOrEmpty(user.Login))
                 {
 
-                    UserEntity auth = _service.User(user.Login);
-
-                    if (auth == null)
-                        throw new AuthenticationException();
-
-                    var hash = UserEntity.Hash(user.Password);
-                    if (auth.HashPassword != hash)
-                        throw new AuthenticationException();
-
-                    var token = new JwtTokenManager(_tokenConfiguration)
-                                        .AddMail(auth.Email)
-                                        .AddPseudo(auth.Pseudo)
-                                        .AddSubject(user.Login)
-                                        .AddExpiry(60)
-                                        .Build();
+                    var u = _service.Authenticate(user.Login, user.Password);
+                    string token = _service.GetToken(u, _tokenConfiguration);
 
                     return token;
 
@@ -76,13 +65,13 @@ namespace Bb.Controllers
 
             return this.Execute(execute, false);
 
-        }           
+        }
 
-    
 
-    private readonly OptionServices _service;
-    private readonly JwtTokenConfiguration _tokenConfiguration;
-}
+
+        private readonly OptionServices _service;
+        private readonly JwtTokenConfiguration _tokenConfiguration;
+    }
 
 
 

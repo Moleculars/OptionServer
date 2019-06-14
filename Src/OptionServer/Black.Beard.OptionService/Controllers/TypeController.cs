@@ -1,4 +1,4 @@
-﻿using Bb.Exceptions;
+﻿using Bb.OptionServer;
 using Bb.OptionService.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,16 +27,18 @@ namespace Bb.Controllers
             TypeModel execute(ControllerBase self, string username)
             {
 
-                var env = _service.AddType(username, model.Groupname, model.TypeName, model.Extension, model.Validator);
+                var user = _service.User(username);
+
+                var type = _service.AddType(user, model.Groupname, model.TypeName, model.Extension, model.Validator);
 
                 var result = new TypeModel()
                 {
-                    Groupname = model.Groupname,
-                    TypeName = env.Name,
-                    Extension = env.Extension,
-                    Validator = env.Version.Contract,
-                    Sha256 = env.Version.Sha256,
-                    Version = env.Version.Version,
+                    Groupname = type.Group.FullName,
+                    TypeName = type.TypeName,
+                    Extension = type.Extension,
+                    Validator = type.CurrentVersion.Contract,
+                    Sha256 = type.CurrentVersion.Sha256,
+                    Version = type.CurrentVersion.Version,
                 };
 
                 return result;
@@ -44,7 +46,7 @@ namespace Bb.Controllers
             }
 
             return this.Execute(execute, true);
-            
+
         }
 
         [HttpPost("updateContract", Name = "type.updateContract")]
@@ -54,14 +56,17 @@ namespace Bb.Controllers
             TypeModel execute(ControllerBase self, string username)
             {
 
-                var env = _service.UpdateContract(username, model.Groupname, model.TypeName, model.Validator);
+                var user = _service.User(username);
+
+                var type = _service.UpdateContract(user, model.Groupname, model.TypeName, model.Validator);
                 var result = new TypeModel()
                 {
-                    Groupname = model.Groupname,
-                    TypeName = env.Name,
-                    Extension = env.Extension,
-                    Validator = env.Version.Contract,
-                    Version = env.Version.Version,
+                    Groupname = type.Group.FullName,
+                    TypeName = type.TypeName,
+                    Extension = type.Extension,
+                    Validator = type.CurrentVersion.Contract,
+                    Version = type.CurrentVersion.Version,
+                    Sha256 = type.CurrentVersion.Sha256,
                 };
 
                 return result;
@@ -78,14 +83,18 @@ namespace Bb.Controllers
 
             TypeModel execute(ControllerBase self, string username)
             {
-                var env = _service.UpdateExtension(username, model.Groupname, model.TypeName, model.Extension);
+
+                var user = _service.User(username);
+
+                var type = _service.UpdateExtension(user, model.Groupname, model.TypeName, model.Extension);
                 var result = new TypeModel()
                 {
-                    Groupname = model.Groupname,
-                    TypeName = env.Name,
-                    Extension = env.Extension,
-                    Validator = env.Version.Contract,
-                    Version = env.Version.Version,
+                    Groupname = type.Group.FullName,
+                    TypeName = type.TypeName,
+                    Extension = type.Extension,
+                    Validator = type.CurrentVersion.Contract,
+                    Version = type.CurrentVersion.Version,
+                    Sha256 = type.CurrentVersion.Sha256,
                 };
 
                 return result;
@@ -103,15 +112,17 @@ namespace Bb.Controllers
             List<TypeModel> execute(ControllerBase self, string username)
             {
 
-                var env = _service.GetTypes(username, groupName);
-                var result = env.Select(c => new TypeModel()
+                var user = _service.User(username);
+                var group = user.ResolveGroup(groupName).Group.Infos;
+                var types = group.GetTypes();
+                var result = types.Select(type => new TypeModel()
                 {
-                    Groupname = groupName,
-                    TypeName = c.Name,
-                    Extension = c.Extension,
-                    Validator = c.Version.Contract,
-                    Version = c.Version.Version,
-                    Sha256 = c.Version.Sha256,
+                    Groupname = type.Group.FullName,
+                    TypeName = type.TypeName,
+                    Extension = type.Extension,
+                    Validator = type.CurrentVersion.Contract,
+                    Version = type.CurrentVersion.Version,
+                    Sha256 = type.CurrentVersion.Sha256,
                 }).ToList();
 
                 return result;
@@ -122,23 +133,61 @@ namespace Bb.Controllers
 
         }
 
-        [HttpGet("get/{groupName}/{typeName}", Name = "type.get")]
+        [HttpGet("get/{groupName}/{typeName}", Name = "type.getByName")]
         public ActionResult<RootResultModel<TypeModel>> Get(string groupName, string typeName)
         {
 
             TypeModel execute(ControllerBase self, string username)
             {
-                var type = _service.GetType(username, groupName, typeName);
+
+                var user = _service.User(username);
+
+                var type = _service.GetType(user, groupName, typeName);
                 var result = new TypeModel()
                 {
-                    Groupname = groupName,
-                    TypeName = type.Name,
+                    Groupname = type.Group.FullName,
+                    TypeName = type.TypeName,
                     Extension = type.Extension,
-                    Validator = type.Version.Contract,
-                    Version = type.Version.Version,
+                    Validator = type.CurrentVersion.Contract,
+                    Version = type.CurrentVersion.Version,
+                    Sha256 = type.CurrentVersion.Sha256,
                 };
 
                 return result;
+            }
+
+            return this.Execute(execute, true);
+
+        }
+
+        [HttpGet("extension/{groupName}/{typeName}", Name = "type.getByExtension")]
+        public ActionResult<RootResultModel<List<TypeModel>>> GetByExtension(string groupName, string extension)
+        {
+
+            if (!extension.StartsWith('.'))
+                extension = "." + extension;
+
+            List<TypeModel> execute(ControllerBase self, string username)
+            {
+
+                var user = _service.User(username);
+                var group = user.ResolveGroup(groupName).Group.Infos;
+                var types = group.GetTypes();
+                
+                var result = types
+                    .Where(c => c.Extension == extension)
+                    .Select(type => new TypeModel()
+                    {
+                        Groupname = type.Group.FullName,
+                        TypeName = type.TypeName,
+                        Extension = type.Extension,
+                        Validator = type.CurrentVersion.Contract,
+                        Version = type.CurrentVersion.Version,
+                        Sha256 = type.CurrentVersion.Sha256,
+                    }).ToList();
+
+                return result;
+
             }
 
             return this.Execute(execute, true);

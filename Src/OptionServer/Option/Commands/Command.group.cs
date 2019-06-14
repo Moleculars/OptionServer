@@ -33,6 +33,7 @@ namespace Bb.Option.Commands
                 var argGroupName = validator.Argument("groupName",
                     "application group name that contains all configuration of your pool of aapplication. (this argument is required)"
                     , ValidatorExtension.EvaluateRequired
+                    , ValidatorExtension.EvaluateName
                     );
 
                 config.OnExecute(() =>
@@ -46,8 +47,8 @@ namespace Bb.Option.Commands
 
                     if (result.Result != null)
                     {
-                        Output.WriteLine($"group '{argGroupName.Value}' created");
-                        Helper.Parameters.WorkingGroup = argGroupName.Value;
+                        Output.WriteLine($"group '{result.Result.Datas.ApplicationGroupName}' created");
+                        Helper.Parameters.WorkingGroup = result.Result.Datas.ApplicationGroupName;
                         Output.WriteLine($"working group setted on {Helper.Parameters.WorkingGroup}");
 
                         PrintDataExtensions.ClearBorder();
@@ -81,7 +82,14 @@ namespace Bb.Option.Commands
                     if (validator.Evaluate() > 0)
                         return 2;
 
-                    Helper.Parameters.WorkingGroup = argGroupName.Value;
+                    var groupName = argGroupName.Value;
+
+                    var result = Client.Get<RootResultModel<GroupApplicationResult>>($"api/ApplicationGroup/resolve/{argGroupName.Value}", GetToken());
+                    result.Wait();
+
+                    groupName = result.Result.Datas.ApplicationGroupName;
+
+                    Helper.Parameters.WorkingGroup = groupName;
                     Output.WriteLine($"working group setted on {Helper.Parameters.WorkingGroup}");
 
                     return 0;

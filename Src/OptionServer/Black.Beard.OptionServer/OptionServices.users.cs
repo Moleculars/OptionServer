@@ -1,37 +1,36 @@
-﻿using Bb.Exceptions;
-using Bb.OptionServer;
+﻿using Bb.OptionServer.Entities;
+using Bb.Security.Jwt;
+using Bb.OptionServer.Repositories.Tables;
 using System;
+using System.Security.Authentication;
+using Bb.OptionServer.Exceptions;
 
-namespace Bb
+namespace Bb.OptionServer
 {
 
     public partial class OptionServices
     {
 
-        private UserRepository Users => _users ?? (_users = new UserRepository(_manager));
-
-        public UserEntity AddUser(string username, string password, string email, string pseudo)
+        public UsersTable AddUser(string username, string password, string email, string pseudo)
         {
 
             var user = Users.Read(username);
             if (user != null)
                 throw new AllreadyExistException(nameof(username));
 
-            user = new UserEntity()
-            {
-                Id = Guid.NewGuid(),
-                Username = username,
-                Pseudo = pseudo,
-                Email = email,
-                HashPassword = UserEntity.Hash(password),
+            user = new UsersTable();
+            user.Id.Value = Guid.NewGuid();
+            user.Username.Value = username;
+            user.Pseudo.Value = pseudo;
+            user.Email.Value = email;
+            user.HashPassword.Value = Sha.HashPassword(password);
 
-                AccessProfile = _users.IsEmpty() 
-                    ? UserProfileEnum.Administrator 
-                    : UserProfileEnum.Classical,
+            user.AccessProfile.Value = (int)(_users.IsEmpty()
+                ? UserProfileEnum.Administrator
+                : UserProfileEnum.Classical);
 
-            };
 
-            if (Users.Save(user))
+            if (Users.Insert(user))
                 user = Users.Read(username);
 
             else
@@ -41,14 +40,90 @@ namespace Bb
 
         }
 
+        public UserEntity User(Guid userId)
+        {
+            var user = Users.Read(userId);
+
+            if (user == null)
+                throw new MissingUserException(userId.ToString());
+
+            var _user = new UserEntity()
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Pseudo = user.Pseudo,
+                Username = user.Username,
+                LastUpdate = user.LastUpdate,
+                HashPassword = user.HashPassword,
+                SecurityCoherence = user.SecurityCoherence,
+                AccessProfile = (UserProfileEnum)user.AccessProfile.Value,
+            };
+
+            Users.LoadGroupForUser(_user);
+
+            return _user;
+
+        }
+
+        public object SetDocument(UserEntity user, ApplicationEntity applicationEntity, object environmentName, object typeName, string name, object content)
+        {
+            throw new NotImplementedException();
+        }
+
         public UserEntity User(string username)
         {
             var user = Users.Read(username);
-            return user;
+
+            if (user == null)
+                throw new MissingUserException(username);
+
+            var _user = new UserEntity()
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Pseudo = user.Pseudo,
+                Username = user.Username,
+                LastUpdate = user.LastUpdate,
+                HashPassword = user.HashPassword,
+                SecurityCoherence = user.SecurityCoherence,
+                AccessProfile = (UserProfileEnum)user.AccessProfile.Value,
+            };
+
+            Users.LoadGroupForUser(_user);
+
+            return _user;
+
         }
 
+        public UserEntity Authenticate(string username, string password)
+        {
 
-        private UserRepository _users;
+            UserEntity auth = User(username);
+
+            if (auth == null)
+                throw new AuthenticationException();
+
+            var hash = Sha.HashPassword(password);
+            if (auth.HashPassword != hash)
+                throw new AuthenticationException();
+
+            return auth;
+
+        }
+
+        public string GetToken(UserEntity user, JwtTokenConfiguration _tokenConfiguration)
+        {
+
+            string token = new JwtTokenManager(_tokenConfiguration)
+                                .AddMail(user.Email)
+                                .AddPseudo(user.Pseudo)
+                                .AddSubject(user.Username)
+                                .AddExpiry(60)
+                                .Build();
+
+            return token;
+
+        }
 
     }
 }

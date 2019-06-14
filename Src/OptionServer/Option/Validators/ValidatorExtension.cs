@@ -26,7 +26,7 @@ namespace Bb.Option.Validators
 
             if (option.HasValue())
             {
-                FileInfo file = new FileInfo( option.Value());
+                FileInfo file = new FileInfo(option.Value());
                 if (!file.Exists)
                     return Error($"file '{file.FullName}' not found");
             }
@@ -53,6 +53,36 @@ namespace Bb.Option.Validators
                     return Error("{0} is unexpected", option);
                 }
             }
+
+            return 0;
+
+        }
+
+        public static int EvaluateFileExist(CommandArgument option)
+        {
+
+            if (!string.IsNullOrEmpty(option.Value))
+            {
+                var file = option.Value.GetFilename();
+                if (!file.Exists)
+                    return Error($"file '{file.FullName}' not found");
+            }
+
+            return Error($"Missing filename");
+
+        }
+
+        public static FileInfo GetFilename(this string self)
+        {
+            FileInfo file = new FileInfo(self);
+            return file;
+        }
+
+        public static int EvaluateName(CommandArgument command)
+        {
+
+            if (command.Value.Contains('.'))
+                return Error("name {0} can't contains '.' character", command);
 
             return 0;
 

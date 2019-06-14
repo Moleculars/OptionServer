@@ -1,52 +1,66 @@
 ﻿using Bb.OptionServer;
+using Bb.OptionServer.Entities;
+using Bb.OptionServer.Repositories.Tables;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace Bb
+namespace Bb.OptionServer
 {
 
     public partial class OptionServices
     {
 
 
-        public List<EnvironmentEntity> GetEnvironments(string username, string groupName)
+        public GroupEntity LoadEnvironments(UserEntity user, string groupName)
         {
 
-            var group = CheckGroup(username, groupName, AccessEntityEnum.Read, objectKingEnum.Environment);
+            var path = user.ResolveGroup(groupName);
+            var group = user.CheckGroup(path, AccessEntityEnum.Reader, objectKingEnum.Environment);
 
-            return Environments.ReadAll(group.ApplicationGroupId).ToList();
+            var i = Environments.ReadAllForGroup(group.GroupId).ToList();
+
+            path.Group.Infos.AddEnvironments(i.Select(c => new EnvironmentEntity()
+            {
+                Group = path.Group.Infos,
+                EnvironmentId = c.Id,
+                EnvironmentName = c.Name,
+            }).ToArray());
+
+            return group;
 
         }
 
-        public EnvironmentEntity AddEnvironment(string username, string groupName, string name)
+        public EnvironmentEntity AddEnvironment(UserEntity user, string groupName, string name)
         {
 
-            var group = CheckGroup(username, groupName, AccessEntityEnum.Add, objectKingEnum.Environment);
+            var path = user.ResolveGroup(groupName);
+            var group = user.CheckGroup(path, AccessEntityEnum.Operator, objectKingEnum.Environment);
 
-            var env = new EnvironmentEntity()
+            var env = new EnvironmentTable();
+            env.Id.Value = Guid.NewGuid();
+            env.GroupId.Value = path.Group.Infos.GroupId;
+            env.Name.Value = name;
+
+            Environments.Insert(env);
+
+            var e = new EnvironmentEntity()
             {
-                Id = Guid.NewGuid(),
-                GroupId = group.ApplicationGroupId,
-                Name = name,
+                Group = group,
+                EnvironmentId = env.Id,
+                EnvironmentName = env.Name,
             };
 
-            Environments.Save(env);
+            path.Group.Infos.AddEnvironments(e);
 
-            return env;
+            return e;
 
         }
 
-        public EnvironmentEntity Environment(Guid groupId, string name)
+        public EnvironmentTable Environment(Guid groupId, string name)
         {
             var environment = Environments.Read(groupId, name);
             return environment;
         }
-
-        private EnvironmentRepository Environments => _environments ?? (_environments = new EnvironmentRepository(_manager));
-
-        private EnvironmentRepository _environments;
-
 
     }
 }

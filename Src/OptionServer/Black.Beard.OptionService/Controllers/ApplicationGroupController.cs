@@ -1,4 +1,5 @@
 ﻿using Bb.Controllers;
+using Bb.OptionServer.Entities;
 using Bb.OptionServer;
 using Bb.OptionService.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -25,16 +26,16 @@ namespace Bb.OptionService.Controllers
         /// <param name="groupName">Name of the group.</param>
         /// <returns></returns>
         [HttpGet("add/{groupName}", Name = "applicationGroup.create")]
-        public ActionResult<RootResultModel<GroupApplicationResult>> Create(string groupName)
+        public ActionResult<RootResultModel<OwnerResult>> Create(string groupName)
         {
 
-            GroupApplicationResult execute(ControllerBase self, string username)
+            OwnerResult execute(ControllerBase self, string username)
             {
-                var groups = _service.CreateGroupApplication(username, groupName);
-                List<GroupApplicationResult> _dic = Converts(groups);
-                var result = _dic.FirstOrDefault();
-                return result;
+                var user = _service.User(username);
+                user = _service.CreateGroupApplication(user, groupName);
+                OwnerResult result = Convert(user.OwnerAccess.Values.First());
 
+                return result;
             }
 
             return this.Execute(execute, true);
@@ -52,11 +53,10 @@ namespace Bb.OptionService.Controllers
 
             GroupApplicationResult execute(ControllerBase self, string username)
             {
-
-                var groups = _service.GroupApplication(username, groupName);
-                List<GroupApplicationResult> _items = Converts(groups);
-                var result = _items.FirstOrDefault();
-                return result;
+                UserEntity user = _service.User(username);
+                OptionPath path = user.ResolveGroup(groupName);
+                GroupApplicationResult _item = Convert(path.Group);
+                return _item;
 
             }
 
@@ -69,14 +69,14 @@ namespace Bb.OptionService.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("list", Name = "applicationGroup.list")]
-        public ActionResult<RootResultModel<List<GroupApplicationResult>>> List()
+        public ActionResult<RootResultModel<List<OwnerResult>>> List()
         {
 
-            List<GroupApplicationResult> execute(ControllerBase self, string username)
+            List<OwnerResult> execute(ControllerBase self, string username)
             {
 
-                var groups = _service.GetGroupApplicationsForUser(username);
-                List<GroupApplicationResult> result = Converts(groups);
+                var user = _service.User(username);
+                List<OwnerResult> result = Converts(user.OwnerAccess.Values);
                 return result;
 
             }
@@ -91,22 +91,25 @@ namespace Bb.OptionService.Controllers
         /// <param name="groupName">Name of the group.</param>
         /// <returns></returns>
         [HttpPost("access", Name = "applicationGroup.access")]
-        public ActionResult<RootResultModel<GroupApplicationResult>> SetAccess(GrantModel model)
+        public ActionResult<RootResultModel<List<OwnerResult>>> SetAccess(GrantModel model)
         {
 
-            GroupApplicationResult execute(ControllerBase self, string username)
+            List<OwnerResult> execute(ControllerBase self, string username)
             {
 
-                var groups = _service.SetAccess(
-                    username,
-                    model.User,
+                var userOwner = _service.User(username);
+                var user = _service.User(model.User);
+
+                var userResult = _service.SetAccess(
+                    userOwner,
+                    user,
                     model.GroupName,
                     (AccessEntityEnum)(int)model.AccessApplication,
                     (AccessEntityEnum)(int)model.AccessType,
                     (AccessEntityEnum)(int)model.AccessEnvironment
                 );
 
-                GroupApplicationResult result = Convert(groups);
+                List<OwnerResult> result = Converts(userResult.OwnerAccess.Values);
 
                 return result;
 
@@ -116,57 +119,74 @@ namespace Bb.OptionService.Controllers
 
         }
 
-        private static List<GroupApplicationResult> Converts(List<ApplicationGroupAccessEntity> groups)
+
+        private List<OwnerResult> Converts(Dictionary<string, OwnerEntity>.ValueCollection values)
         {
 
-            Dictionary<string, GroupApplicationResult> _dic = new Dictionary<string, GroupApplicationResult>();
-
-            foreach (ApplicationGroupAccessEntity item in groups)
-            {
-
-                if (!_dic.TryGetValue(item.ApplicationGroupName, out GroupApplicationResult group))
-                    _dic.Add(item.ApplicationGroupName, group = new GroupApplicationResult()
-                    {
-                        ApplicationGroupId = item.ApplicationGroupId,
-                        ApplicationGroupName = item.ApplicationGroupName,
-                    });
-
-                group.Accesses.Add(new AccessResult()
-                {
-                    UserId = item.UserId,
-                    Username = item.Username,
-                    ApplicationAccesses = item.ApplicationAccess.GetPrivilegesToString(),
-                    EnvironmentAccesses = item.EnvironmentAccess.GetPrivilegesToString(),
-                    TypeAccesses = item.TypeAccess.GetPrivilegesToString(),
-                });
-
-            }
-
-            return _dic.Select(c => c.Value).ToList();
-
+            return values.Select(c => Convert(c)).ToList();
         }
 
-        private static GroupApplicationResult Convert(ApplicationGroupAccessEntity group)
+        private static List<OwnerResult> Convert(IEnumerable<OwnerEntity> owners)
+        {
+            return owners.Select(c => Convert(c)).ToList();
+        }
+
+        private static OwnerResult Convert(OwnerEntity owner)
+        {
+            return new OwnerResult()
+            {
+                Name = owner.Pseudo,
+                Groups = Converts(owner.Groups.Values),
+            };
+        }
+
+        private static List<GroupApplicationResult> Converts(IEnumerable<ApplicationGroupPath> groups)
+        {
+            return groups.Select(c => Convert(c)).ToList();
+        }
+
+        private static GroupApplicationResult Convert(ApplicationGroupPath group)
+        {
+            return Convert(group.Infos);
+        }
+
+        private static List<GroupApplicationResult> Converts(IEnumerable<GroupEntity> infos)
+        {
+            return infos.Select(c => Convert(c)).ToList();
+        }
+
+        private static GroupApplicationResult Convert(GroupEntity infos)
         {
 
             var _group = new GroupApplicationResult()
             {
-                ApplicationGroupId = group.ApplicationGroupId,
-                ApplicationGroupName = group.ApplicationGroupName,
+                ApplicationGroupName = infos.GroupName,
+                Owner = infos.Owner.Pseudo,
             };
 
-            _group.Accesses.Add(new AccessResult()
+            _group.Access.Add(new AccessResult()
             {
-                UserId = group.UserId,
-                Username = group.Username,
-                ApplicationAccesses = group.ApplicationAccess.GetPrivilegesToString(),
-                EnvironmentAccesses = group.EnvironmentAccess.GetPrivilegesToString(),
-                TypeAccesses = group.TypeAccess.GetPrivilegesToString(),
+                ApplicationAccesses = infos.ApplicationAccess.GetPrivilegesToString(),
+                EnvironmentAccesses = infos.EnvironmentAccess.GetPrivilegesToString(),
+                TypeAccesses = infos.TypeAccess.GetPrivilegesToString(),
             });
 
             return _group;
 
         }
+
+
+        //private static GroupApplicationResult Convert(ApplicationGroupTable group)
+        //{
+
+        //    var _group = new GroupApplicationResult()
+        //    {
+        //        ApplicationGroupName = group.Name,
+        //    };
+
+        //    return _group;
+
+        //}
 
         private readonly OptionServices _service;
 
