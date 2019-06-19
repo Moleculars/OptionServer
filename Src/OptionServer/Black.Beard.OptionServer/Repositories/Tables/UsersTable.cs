@@ -3,9 +3,24 @@ using cm = System.ComponentModel.DataAnnotations;
 
 namespace Bb.OptionServer.Repositories.Tables
 {
+
     [cm.Schema.Table("Users", Schema = "dbo")]
     public class UsersTable : IPrimaryTable
     {
+
+        public UsersTable(Guid id, string username, string pseudo, string email, string hashPassword, DateTimeOffset lastupdate, Guid securityoherence, int accessProfile) 
+            : this()
+        {
+            Id.Value = id;
+            Username.Value = username;
+            Pseudo.Value = pseudo;
+            Email.Value = email;
+            HashPassword.Value = hashPassword;
+            LastUpdate.Value = lastupdate;
+            SecurityCoherence.Value = securityoherence;
+            AccessProfile.Value = accessProfile;
+            this.Reset();
+        }
 
         public UsersTable()
         {

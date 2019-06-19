@@ -8,9 +8,9 @@ namespace Bb.Option.Models
 
         public GroupModel(GroupApplicationResult result)
         {
-            var c = result.Accesses[0];
+            var c = result.Access[0];
             Group_Name = result.ApplicationGroupName;
-            Username = string.Join(',', c.Username);
+            Username = string.Join(',', result.Owner);
 
             Application_Accesses = string.Join(',', c.ApplicationAccesses);
             Environment_Accesses = string.Join(',', c.EnvironmentAccesses);

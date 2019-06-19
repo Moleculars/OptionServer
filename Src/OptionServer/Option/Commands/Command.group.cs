@@ -13,6 +13,7 @@ namespace Bb.Option.Commands
     public partial class Command
     {
 
+
         public static CommandLineApplication CommandGroup(this CommandLineApplication app)
         {
 
@@ -125,6 +126,8 @@ namespace Bb.Option.Commands
                         .Convert(result.Result.Datas, "group")
                         .PrintList();
 
+                    Command.Result = result.Result.Datas;
+
                     return 0;
 
                 });
@@ -152,6 +155,7 @@ namespace Bb.Option.Commands
                         .ConvertList(_list, "list of groups can to be used")
                         .Print();
 
+                    Command.Result = _list;
                     return 0;
 
                 });
@@ -242,6 +246,8 @@ namespace Bb.Option.Commands
                         .Convert(r, "result accesses")
                         .PrintList();
 
+                    Command.Result = r;
+
                     return 0;
 
                 });
@@ -292,6 +298,8 @@ namespace Bb.Option.Commands
                     ConvertToDatatable
                         .Convert(r, "result accesses")
                         .PrintList();
+
+                    Command.Result = r;
 
                     return 0;
                 });

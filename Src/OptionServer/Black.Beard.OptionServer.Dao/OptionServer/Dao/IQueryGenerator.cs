@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bb.OptionServer.Dao;
+using System;
 using System.Data;
 using System.Data.Common;
 using System.Linq.Expressions;
@@ -12,13 +13,15 @@ namespace Bb.OptionServer
 
         SqlManager Manager { get; }
 
-        (StringBuilder, DbParameter[]) Insert(object instance, ObjectMapping mapping);
+        QueryCommand Generate(QuerySqlCommand query);
 
-        (StringBuilder, DbParameter[]) Remove(object instance, ObjectMapping mapping);
+        //QueryCommand Insert(object instance, ObjectMapping mapping);
 
-        (StringBuilder, DbParameter[]) Update(object instance, ObjectMapping mapping);
+        //QueryCommand Remove(object instance, ObjectMapping mapping);
 
-        (StringBuilder, DbParameter[]) Select<T>(ObjectMapping mapping, Expression<Func<T, bool>>[] e);
+        //QueryCommand Update(object instance, ObjectMapping mapping);
+
+        QueryCommand Select<T>(ObjectMapping mapping, Expression<Func<T, bool>>[] e);
 
         string Declare(string variableName, DbType variableType, string value);
 

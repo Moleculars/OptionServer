@@ -17,13 +17,14 @@ namespace Bb.OptionServer
             _factory = DbProviderFactories.GetFactory(configuration.ProviderInvariantName);
             _configuration = configuration;
             _space = "\t";
+            this.QueryGenerator = configuration.QueryManager(this);
         }
 
         public DbProviderFactory Factory => _factory;
 
         public bool Log { get; private set; }
 
-        public IQueryGenerator QueryGenerator { get; internal set; }
+        public IQueryGenerator QueryGenerator { get; }
 
         public IEnumerable<T> Read<T>(string sql, params DbParameter[] parameters)
             where T : IMapperDbDataReader, new()
@@ -302,6 +303,8 @@ namespace Bb.OptionServer
             cnx.ConnectionString = _configuration.ConnectionString;
             return cnx;
         }
+
+        public SqlManagerConfiguration Configuration => _configuration;
 
 
         private readonly DbProviderFactory _factory;

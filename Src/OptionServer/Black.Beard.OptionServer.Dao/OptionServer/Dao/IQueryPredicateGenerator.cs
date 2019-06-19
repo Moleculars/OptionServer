@@ -9,10 +9,21 @@ namespace Bb.OptionServer
     public class SqlServerPredicateGenerator : IQueryPredicateGenerator
     {
 
-        public SqlServerPredicateGenerator()
+        private SqlServerPredicateGenerator()
         {
 
         }
+
+        static SqlServerPredicateGenerator()
+        {
+            Instance = new SqlServerPredicateGenerator();
+        }
+
+
+        public static IQueryPredicateGenerator Instance { get; }
+
+
+        public string CurrentTimestamp => "CURRENT_TIMESTAMP";
 
         public string WriteEquality()
         {
@@ -167,6 +178,7 @@ namespace Bb.OptionServer
 
     public interface IQueryPredicateGenerator
     {
+        string CurrentTimestamp { get; }
 
         string WriteMember(string name);
 

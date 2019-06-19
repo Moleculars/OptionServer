@@ -37,7 +37,7 @@ namespace Bb.OptionServer.Repositories
 
             string sql1 = @"
             SELECT 
-	            v.TypeId,
+				t.Id AS [TypeId],
 	            t.Name as [TypeName],
 	            t.Extension,
 	            t.GroupId,
@@ -49,7 +49,7 @@ namespace Bb.OptionServer.Repositories
 	            v.SecurityCoherence as [VersionSecurityCoherence],
 	            v.Version
 	 
-            FROM Type t
+            FROM [Type] t
             LEFT JOIN TypeVersion v ON t.CurrentVersionId = v.Id
 
             WHERE t.GroupId IN (

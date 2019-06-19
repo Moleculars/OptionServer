@@ -1,4 +1,5 @@
 using Bb.Option;
+using Bb.Option.Commands;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -31,6 +32,45 @@ namespace Option.UnitTests
 
         [TestMethod]
         public void TestCreateUser()
+        {
+
+            Output.SetModeDebug();
+
+            string username1 = GetUsername();
+            string pass1 = Guid.NewGuid().ToString();
+            string pseudo = GetPseudo();
+            string email = GetEmail();
+
+            Option.Program.Main(new string[] { "server", "https://localhost:5001" });
+            Assert.AreEqual(Option.Program.ExitCode, 0);
+            Assert.AreEqual(Command.Result, "https://localhost:5001");
+
+            Option.Program.Main(new string[] { "user", "add", username1, pass1, email, pseudo });
+            Assert.AreEqual(Option.Program.ExitCode, 0);
+
+            Option.Program.Main(new string[] { "user", "connect", username1, pass1 });
+            Assert.AreEqual(Option.Program.ExitCode, 0);
+
+            Option.Program.Main(new string[] { "group", "add", "groupPar1" });
+            Assert.AreEqual(Option.Program.ExitCode, 0);
+
+            Option.Program.Main(new string[] { "group", "list" });
+            Assert.AreEqual(Option.Program.ExitCode, 0);
+
+            Option.Program.Main(new string[] { "user", "connect", username1, pass1 });
+            Assert.AreEqual(Option.Program.ExitCode, 0);
+
+            Option.Program.Main(new string[] { "group", "set", "groupPar1" });
+            Assert.AreEqual(Option.Program.ExitCode, 0);
+
+            Bb.Option.Helper.Parameters = null;
+            Bb.Option.Helper.Load();
+            Assert.AreEqual(Bb.Option.Helper.Parameters.Token != null, true);
+
+        }
+
+        [TestMethod]
+        public void TestCreateUser2()
         {
 
             Output.SetModeDebug();

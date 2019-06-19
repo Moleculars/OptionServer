@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
 using System.Data.Common;
 using System.IO;
 
@@ -91,23 +92,31 @@ namespace Bb.OptionService
             });
 
 
-            
+
 
         }
 
 
+        public class Connection
+        {
+
+            public string ConnectionName { get; set; }
+
+            public string ProviderInvariantName { get; set; }
+
+        }
 
         private void RegisterManager(IServiceCollection services)
         {
-            DbProviderFactories.RegisterFactory("SqlClientFactory", System.Data.SqlClient.SqlClientFactory.Instance);
-            var sqlManagerConfiguration = new SqlManagerConfiguration()
-            {
-                ProviderInvariantName = "SqlClientFactory",
-                ConnectionString = Configuration.GetConnectionString("DefaultConnection"),
-            };
+
+            var cnx = new Connection();
+            Configuration.Bind("Connection", cnx);
+
+            SqlManagerConfiguration sqlManagerConfiguration = RegisterConnexion(cnx);
 
             services.Add(ServiceDescriptor.Singleton(typeof(SqlManagerConfiguration), sqlManagerConfiguration));
             services.Add(ServiceDescriptor.Transient(typeof(SqlManager), typeof(SqlManager)));
+            services.Add(ServiceDescriptor.Transient(typeof(DtoSqlManager), typeof(DtoSqlManager)));
             services.Add(ServiceDescriptor.Transient(typeof(OptionServices), typeof(OptionServices)));
 
             if (_useSwagger)
@@ -143,6 +152,40 @@ namespace Bb.OptionService
 
                 });
             }
+
+        }
+
+        private SqlManagerConfiguration RegisterConnexion(Connection cnx)
+        {
+
+            DbProviderFactory factory = null;
+            Func<SqlManager, IQueryGenerator> func = null;
+
+            switch (cnx.ProviderInvariantName)
+            {
+
+                case "SqlClientFactory":
+                    factory = System.Data.SqlClient.SqlClientFactory.Instance;
+                    func = c => new SqlServerQueryGenerator(c);
+                    break;
+
+                default:
+                    throw new Exception($"failed to intialize connection to '{cnx.ProviderInvariantName}'");
+
+            }
+
+
+
+            DbProviderFactories.RegisterFactory(cnx.ProviderInvariantName, factory);
+
+            var sqlManagerConfiguration = new SqlManagerConfiguration()
+            {
+                ProviderInvariantName = cnx.ProviderInvariantName,
+                ConnectionString = Configuration.GetConnectionString(cnx.ConnectionName),
+                QueryManager = func,
+            };
+
+            return sqlManagerConfiguration;
 
         }
 

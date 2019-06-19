@@ -72,13 +72,15 @@ namespace Bb.Option.Commands
                         Login = argUsername.Value,
                         Password = argPassword.Value,
                         Pseudo = pseudo,
-                        Mail = argEmail.Value
+                        Mail = argEmail.Value,
                     };
 
                     var result = Client.Post<RootResultModel<UserCreatedResultModel>>("api/user/add", model);
                     result.Wait();
 
                     Output.WriteLine($"user {argUsername.Value} is added");
+
+                    Command.Result = result.Result.Datas;
 
                     return 0;
 
@@ -126,6 +128,9 @@ namespace Bb.Option.Commands
                         Helper.Parameters.TokenExpiration = DateTime.Now.AddMinutes(60);
                         Output.WriteLine($"{argUsername.Value} is connected");
                         Helper.Parameters.WorkingGroup = null;
+
+                        Command.Result = result.Result.Datas;
+
                     }
                     catch (Exception e)
                     {

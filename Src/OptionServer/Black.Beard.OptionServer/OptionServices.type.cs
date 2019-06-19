@@ -22,19 +22,19 @@ namespace Bb.OptionServer
             var group = user.CheckGroup(path, AccessEntityEnum.Operator, objectKingEnum.Type);
 
             var typeId = Guid.NewGuid();
-            var id = Guid.NewGuid();
+            var versionId = Guid.NewGuid();
 
             var type = new TypeTable();
-            type.Id.Value = Guid.NewGuid();
+            type.Id.Value = typeId;
             type.GroupId.Value = group.GroupId;
             type.Name.Value = name;
             type.Extension.Value = extension;
             type.SecurityCoherence.Value = Guid.NewGuid();
 
             var version = new TypeVersionTable();
-            version.Id.Value = Guid.NewGuid();
+            version.Id.Value = versionId;
             version.SecurityCoherence.Value = Guid.NewGuid();
-            version.TypeId.Value = type.Id;
+            version.TypeId.Value = typeId;
             version.Version.Value = 1;
             version.Contract.Value = contract;
             version.Sha256.Value = string.IsNullOrEmpty(contract) ? string.Empty : Sha.Sha256_hash(contract);
@@ -43,7 +43,7 @@ namespace Bb.OptionServer
             {
                 Types.Insert(type);
                 TypeVersions.Insert(version);
-                type.CurrentVersionId.Value = version.Id;
+                type.CurrentVersionId.Value = versionId;
                 Types.Update(type);
                 trans.Commit();
             }

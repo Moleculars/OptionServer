@@ -39,7 +39,7 @@ namespace Black.Beard.OptionServer.UnitTests
             var userId = (Guid)user.Id;
             var userBis = rep.Read((Guid)user.Id);
 
-            Assert.AreEqual(user.Id, userBis.Id);
+            Assert.AreEqual(user.Id.Value, userBis.Id.Value);
 
         }
 

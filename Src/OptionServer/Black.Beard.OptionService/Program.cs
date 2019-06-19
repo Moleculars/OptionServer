@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using Bb.OptionService;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
+using System;
 
 namespace Bb.OptionService
 {
@@ -17,25 +11,66 @@ namespace Bb.OptionService
         public static void Main(string[] args)
         {
 
-            CreateWebHostBuilder(args)
-                //.UseKestrel(option =>
-                //{
+            InitializeLog();
+            try
+            {
+                Log.Information("Starting web host");
 
-                //    option.Listen(IPAddress.Loopback, 5000);
-                //    option.Listen(IPAddress.Any, 80);
-                //    option.Listen(IPAddress.Loopback, 443, listenOptions =>
-                //    {
-                //        listenOptions.UseHttps()
-                //        listenOptions.UseHttps("", "password");
-                //    });
+                CreateWebHostBuilder(args)
+             //.UseKestrel(option =>
+             //{
 
-                //})                
-                .Build()
-                .Run();
+             //    option.Listen(IPAddress.Loopback, 5000);
+             //    option.Listen(IPAddress.Any, 80);
+             //    option.Listen(IPAddress.Loopback, 443, listenOptions =>
+             //    {
+             //        listenOptions.UseHttps()
+             //        listenOptions.UseHttps("", "password");
+             //    });
+
+             //})                
+             .Build()
+             .Run();
+
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Host terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+
+
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+        private static void InitializeLog()
+        {
+            Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateLogger();
+
+            var listeners = System.Diagnostics.Trace.Listeners;
+            listeners.Clear();
+            var listener = new SerilogTraceListener.SerilogTraceListener()
+            {
+
+            };
+            listeners.Add(listener);
+
+
+            System.Diagnostics.Trace.WriteLine("Log");
+        }
+
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
+.UseSerilog()
+.UseStartup<Startup>();
+        }
     }
 }

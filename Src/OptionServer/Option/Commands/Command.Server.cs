@@ -36,6 +36,8 @@ namespace Bb.Option.Commands
                     Helper.Parameters.ServerUrl = serverName.Value;
                     Output.WriteLine("server option setted on : " + Helper.Parameters.ServerUrl);
 
+                    Result = Helper.Parameters.ServerUrl;
+
                     return 0;
 
                 });

@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <Compile Remove="Client.cs" />
+    <Compile Remove="Commands\Command.Application.cs" />
+    <Compile Remove="Commands\Command.Configuration.cs" />
+    <Compile Remove="Commands\Command.Environment.cs" />
+    <Compile Remove="Commands\Command.Type.cs" />
     <Compile Remove="Program.connect.cs" />
   </ItemGroup>
 

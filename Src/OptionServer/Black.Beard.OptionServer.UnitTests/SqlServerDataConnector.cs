@@ -1,5 +1,6 @@
-﻿using Bb.OptionServer.Entities;
-using Bb.OptionServer;
+﻿using Bb.OptionServer;
+using Bb.OptionServer.Entities;
+using Bb.OptionServer.Repositories.Tables;
 using System;
 using System.Data.Common;
 
@@ -45,6 +46,22 @@ namespace Black.Beard.OptionServer.UnitTests
             return user;
 
         }
+
+        public static UsersTable GetUserTable()
+        {
+            var username = Guid.NewGuid().ToString().Substring(0, 8);
+            var user = new UsersTable
+            (
+                Guid.NewGuid(), 
+                $"user_{username}", 
+                $"{username}_Pseudo", 
+                $"{username}@yopmail.com", 
+                "test", DateTimeOffset.Now, 
+                Guid.NewGuid(), 0
+            );
+            return user;
+        }
+
 
         private static readonly string _name;
 

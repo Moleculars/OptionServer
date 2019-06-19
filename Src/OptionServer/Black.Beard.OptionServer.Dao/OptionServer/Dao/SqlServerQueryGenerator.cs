@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bb.OptionServer.Dao;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -8,297 +9,175 @@ using System.Text;
 
 namespace Bb.OptionServer
 {
+
     public class SqlServerQueryGenerator : IQueryGenerator
     {
 
         public SqlServerQueryGenerator(SqlManager manager)
         {
             Manager = manager;
-            _predicateGenerator = new SqlServerPredicateGenerator();
-            manager.QueryGenerator = this;
+            _predicateGenerator = SqlServerPredicateGenerator.Instance;
         }
 
         public SqlManager Manager { get; }
 
         private readonly IQueryPredicateGenerator _predicateGenerator;
 
-        public (StringBuilder, DbParameter[]) Insert(object instance, ObjectMapping mapping)
+        #region auto
+
+        public QueryCommand Generate(QuerySqlCommand query)
         {
 
-            StringBuilder sb = new StringBuilder(mapping.Columns * 100);
+            if (query.Kind == QueryKindEnum.Insert)
+                return Insert(query);
 
-            sb.Append("INSERT INTO ");
-            sb.Append(_predicateGenerator.WriteMember(mapping.TableName));
+            if (query.Kind == QueryKindEnum.Update)
+                return Update(query);
 
-            sb.Append(" (");
+            if (query.Kind == QueryKindEnum.Delete)
+                return Remove(query);
+
+            return null;
+
+        }
+
+        public QueryCommand Update(QuerySqlCommand query)
+        {
+
+            StringBuilder sb = new StringBuilder(query.Fields.Count * 100);
+            List<DbParameter> _arguments = new List<DbParameter>();
+
+            sb.Append("UPDATE ");
+            sb.Append(_predicateGenerator.WriteMember(query.Table));
+            sb.Append(" SET ");
 
             string comma = string.Empty;
-            foreach (var fields in mapping.Fields)
-            {
-                sb.Append(comma);
-                sb.Append(_predicateGenerator.WriteMember(fields.FieldName));
-                comma = ", ";
-            }
 
-            sb.Append(") VALUES (");
-
-            List<DbParameter> _arguments = new List<DbParameter>();
-            comma = string.Empty;
-            foreach (PropertyMapping field in mapping.Fields)
+            foreach (Field field in query.Fields)
             {
 
                 sb.Append(comma);
+                sb.Append(_predicateGenerator.WriteMember(field.Name));
+                sb.Append(" = ");
 
-                if (field.SecurityCoherence)
-                {
-
-                    if (field.Type == typeof(Guid))
-                    {
-                        if (Guid.Empty.Equals(field.GetValue(instance)))
-                            field.SetValue(instance, Guid.NewGuid());
-                    }
-                    else if (field.Type == typeof(FieldValue<Guid>))
-                    {
-                        var _f = field.GetValue(instance) as IField;
-                        if (_f == null)
-                        {
-                            _f = new FieldValue<Guid>();
-                            _f.Value = Guid.NewGuid();
-                            field.SetValue(instance, _f);
-                        }
-                        if (Guid.Empty.Equals(_f.Value))
-                        {
-                            _f.Value = Guid.NewGuid();
-                            //field.SetValue(instance, _f);
-                        }
-                    }
-
-                }
-
-                if (field.LastChangeDate)
-                    sb.Append("CURRENT_TIMESTAMP");
+                if (field.Value == FieldValue.CURRENT_TIMESTAMP)
+                    sb.Append(_predicateGenerator.CurrentTimestamp);
 
                 else
                 {
-                    var value = field.GetValue(instance);
+                    var value = field.Value.Data;
+                    sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
+                    _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
+                }
+
+                comma = ", ";
+
+            }
+
+            sb.Append(" WHERE ");
+            comma = string.Empty;
+            foreach (Field field in query.FilterFields)
+            {
+
+                sb.Append(comma);
+                sb.Append(_predicateGenerator.WriteMember(field.Name));
+                sb.Append(" = ");
+                sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
+
+                var value = field.Value.Data;
+                _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
+
+                comma = " AND ";
+
+            }
+
+            return new QueryCommand(sb, _arguments.ToArray());
+
+        }
+
+        public QueryCommand Remove(QuerySqlCommand query)
+        {
+
+            StringBuilder sb = new StringBuilder(query.Fields.Count * 100);
+            List<DbParameter> _arguments = new List<DbParameter>();
+
+            sb.Append("DELETE FROM ");
+            sb.Append(_predicateGenerator.WriteMember(query.Table));
+
+            string comma = string.Empty;
+
+            sb.Append(" WHERE ");
+            comma = string.Empty;
+            foreach (Field field in query.FilterFields)
+            {
+
+                sb.Append(comma);
+                sb.Append(_predicateGenerator.WriteMember(field.Name));
+                sb.Append(" = ");
+                sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
+
+                var value = field.Value;
+                _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
+
+                comma = " AND ";
+
+            }
+
+            return new QueryCommand(sb, _arguments.ToArray());
+
+        }
+
+        private QueryCommand Insert(QuerySqlCommand query)
+        {
+
+            StringBuilder sbSql1 = new StringBuilder(query.Fields.Count * 100);
+
+            sbSql1.Append("INSERT INTO ");
+            sbSql1.Append(_predicateGenerator.WriteMember(query.Table));
+            sbSql1.Append(" (");
+
+            string comma = string.Empty;
+            foreach (var field in query.Fields)
+            {
+                sbSql1.Append(comma);
+                sbSql1.Append(_predicateGenerator.WriteMember(field.Name));
+                comma = ", ";
+            }
+
+            sbSql1.Append(") VALUES (");
+
+            List<DbParameter> _arguments = new List<DbParameter>();
+            comma = string.Empty;
+            foreach (Field field in query.Fields)
+            {
+
+                sbSql1.Append(comma);
+
+                if (field.Value == FieldValue.CURRENT_TIMESTAMP)
+                    sbSql1.Append(_predicateGenerator.CurrentTimestamp);
+
+                else
+                {
+
+                    var value = field.Value.Data;
                     if (value == null)
                         value = DBNull.Value;
 
-                    else if (value is IField f)
-                    {
-                        if (f == null)
-                            value = DBNull.Value;
-                        else
-                            value = f.Value;
-                    }
-
-                    sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
+                    sbSql1.Append(_predicateGenerator.WriteParameter(field.VariableName));
                     comma = ", ";
                     _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
                 }
             }
 
-            sb.Append(")");
+            sbSql1.Append(")");
 
-            return (sb, _arguments.ToArray());
-
-        }
-
-        public (StringBuilder, DbParameter[]) Update(object instance, ObjectMapping mapping)
-        {
-
-            StringBuilder sb = new StringBuilder(mapping.Columns * 100);
-            List<DbParameter> _arguments = new List<DbParameter>();
-
-            var c = instance.Changed().ToDictionary(c1 => c1.Item1);
-
-            if (!c.Any())
-                return (sb, _arguments.ToArray());
-
-            sb.Append("UPDATE ");
-            sb.Append(_predicateGenerator.WriteMember(mapping.TableName));
-            sb.Append(" SET ");
-
-            string comma = string.Empty;
-            object newValueSecurity = null;
-            PropertyMapping security = null;
-
-            foreach (PropertyMapping field in mapping.Fields)
-            {
-
-                if (field.SecurityCoherence)
-                {
-
-                    newValueSecurity = field.GetValue(instance);
-                    if (newValueSecurity is IField f)
-                    {
-
-                        newValueSecurity = f.Value;
-
-                        if (!f.HasModified)
-                        {
-
-                            newValueSecurity = field.Type == typeof(Guid) || field.Type == typeof(FieldValue<Guid>)
-                                ? (object)Guid.NewGuid()
-                                : null
-                                ;
-
-                            f.Value = newValueSecurity;
-
-                        }
-
-                    }
-
-                    sb.Append(comma);
-                    sb.Append(_predicateGenerator.WriteMember(field.FieldName));
-                    sb.Append(" = ");
-
-                    sb.Append(_predicateGenerator.WriteParameter("new" + field.FieldName));
-                    _arguments.Add(Manager.CreateParameter("new" + field.FieldName, field.DbType, newValueSecurity));
-                    security = field;
-
-                }
-                else if (field.LastChangeDate)
-                {
-
-                    sb.Append(comma);
-                    sb.Append(_predicateGenerator.WriteMember(field.FieldName));
-                    sb.Append(" = ");
-
-                    sb.Append("CURRENT_TIMESTAMP");
-                }
-                else
-                {
-
-                    if (!c.ContainsKey(field.Name))
-                        continue;
-
-                    sb.Append(comma);
-                    sb.Append(_predicateGenerator.WriteMember(field.FieldName));
-                    sb.Append(" = ");
-
-                    var value = field.GetValue(instance);
-                    if (value is IField f)
-                        value = f.Value;
-
-                    sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
-                    _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
-                }
-
-                comma = ", ";
-
-            }
-
-            sb.Append(" WHERE ");
-            comma = string.Empty;
-            foreach (PropertyMapping field in mapping.Fields)
-                if (field.IsPrimaryKey)
-                {
-
-                    sb.Append(comma);
-                    sb.Append(_predicateGenerator.WriteMember(field.FieldName));
-                    sb.Append(" = ");
-                    sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
-
-                    var value = field.GetValue(instance);
-                    if (value is IField f)
-                    {
-                        if (f.IsDefaultValue(f.OldValue))
-                            value = f.Value;
-                        else
-                            value = f.OldValue;
-                    }
-
-                    _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
-
-                    comma = " AND ";
-
-                }
-
-
-            if (security != null)
-            {
-
-                var value = security.GetValue(instance);
-                if (value is IField f)
-                    value = f.OldValue;
-
-                sb.Append(comma);
-                sb.Append(security.FieldName);
-                sb.Append(" = @");
-                sb.Append("old" + security.FieldName);
-
-                _arguments.Add(Manager.CreateParameter("old" + security.FieldName, security.DbType, value));
-
-            }
-
-            return (sb, _arguments.ToArray());
+            return new QueryCommand(sbSql1, _arguments.ToArray());
 
         }
 
-        public (StringBuilder, DbParameter[]) Remove(object instance, ObjectMapping mapping)
-        {
+        #endregion auto
 
-            StringBuilder sb = new StringBuilder(mapping.Columns * 100);
-            List<DbParameter> _arguments = new List<DbParameter>();
-
-            var c = instance.Changed().ToDictionary(c1 => c1.Item1);
-
-            if (!c.Any())
-                return (sb, _arguments.ToArray());
-
-            sb.Append("DELETE FROM ");
-            sb.Append(_predicateGenerator.WriteMember(mapping.TableName));
-
-            string comma = string.Empty;
-
-            sb.Append(" WHERE ");
-            comma = string.Empty;
-            foreach (PropertyMapping field in mapping.Fields)
-                if (field.IsPrimaryKey)
-                {
-
-                    sb.Append(comma);
-                    sb.Append(_predicateGenerator.WriteMember(field.FieldName));
-                    sb.Append(" = ");
-                    sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
-
-                    var value = field.GetValue(instance);
-                    if (value is IField f)
-                    {
-                        if (f.IsDefaultValue(f.OldValue))
-                            value = f.Value;
-                        else
-                            value = f.OldValue;
-                    }
-
-                    _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
-
-                    comma = " AND ";
-
-                }
-
-            foreach (PropertyMapping security in mapping.Fields)
-                if (security.SecurityCoherence)
-                {
-                    var value = security.GetValue(instance);
-                    if (value is IField f)
-                        value = f.OldValue;
-
-                    sb.Append(comma);
-                    sb.Append(security.FieldName);
-                    sb.Append(" = @");
-                    sb.Append("old" + security.FieldName);
-
-                    _arguments.Add(Manager.CreateParameter("old" + security.FieldName, security.DbType, value));
-                }
-
-
-            return (sb, _arguments.ToArray());
-
-        }
-
-        public (StringBuilder, DbParameter[]) Select<T>(ObjectMapping mapping, Expression<Func<T, bool>>[] e)
+        public QueryCommand Select<T>(ObjectMapping mapping, Expression<Func<T, bool>>[] e)
         {
 
             StringBuilder sb = new StringBuilder(mapping.Columns * 100);
@@ -322,7 +201,7 @@ namespace Bb.OptionServer
 
             ParsePredicate(e.Cast<Expression>().ToArray(), sb, _arguments, mapping);
 
-            return (sb, _arguments.ToArray());
+            return new QueryCommand(sb, _arguments.ToArray());
 
         }
 
@@ -426,43 +305,281 @@ namespace Bb.OptionServer
 
 
 
-        //        public StringBuilder Select2<T>(ObjectMapping mapping, Expression<Func<T, bool>>[] e)
+        
+        //#region manuel
+
+        //public QueryCommand Insert(object instance, ObjectMapping mapping)
+        //{
+
+        //    StringBuilder sbSql1 = new StringBuilder(mapping.Columns * 100);
+
+        //    sbSql1.Append("INSERT INTO ");
+        //    sbSql1.Append(_predicateGenerator.WriteMember(mapping.TableName));
+        //    sbSql1.Append(" (");
+
+        //    string comma = string.Empty;
+        //    foreach (var fields in mapping.Fields)
+        //    {
+        //        sbSql1.Append(comma);
+        //        sbSql1.Append(_predicateGenerator.WriteMember(fields.FieldName));
+        //        comma = ", ";
+        //    }
+
+        //    sbSql1.Append(") VALUES (");
+
+        //    List<DbParameter> _arguments = new List<DbParameter>();
+        //    comma = string.Empty;
+        //    foreach (PropertyMapping field in mapping.Fields)
+        //    {
+
+        //        sbSql1.Append(comma);
+
+        //        if (field.SecurityCoherence)
+        //        {
+
+        //            if (field.Type == typeof(Guid))
+        //            {
+        //                if (Guid.Empty.Equals(field.GetValue(instance)))
+        //                    field.SetValue(instance, Guid.NewGuid());
+        //            }
+        //            else if (field.Type == typeof(FieldValue<Guid>))
+        //            {
+        //                var _f = field.GetValue(instance) as IField;
+        //                if (_f == null)
+        //                {
+        //                    _f = new FieldValue<Guid>();
+        //                    _f.Value = Guid.NewGuid();
+        //                    field.SetValue(instance, _f);
+        //                }
+        //                if (Guid.Empty.Equals(_f.Value))
+        //                {
+        //                    _f.Value = Guid.NewGuid();
+        //                    //field.SetValue(instance, _f);
+        //                }
+        //            }
+
+        //        }
+
+        //        if (field.LastChangeDate)
+        //            sbSql1.Append("CURRENT_TIMESTAMP");
+
+        //        else
+        //        {
+        //            var value = field.GetValue(instance);
+        //            if (value == null)
+        //                value = DBNull.Value;
+
+        //            else if (value is IField f)
+        //            {
+        //                if (f == null)
+        //                    value = DBNull.Value;
+        //                else
+        //                    value = f.Value;
+        //            }
+
+        //            sbSql1.Append(_predicateGenerator.WriteParameter(field.VariableName));
+        //            comma = ", ";
+        //            _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
+        //        }
+        //    }
+
+        //    sbSql1.Append(")");
+
+        //    return new QueryCommand(sbSql1, _arguments.ToArray());
+
+        //}
+
+        //public QueryCommand Update(object instance, ObjectMapping mapping)
         //{
 
         //    StringBuilder sb = new StringBuilder(mapping.Columns * 100);
         //    List<DbParameter> _arguments = new List<DbParameter>();
 
-        //    sb.Append("SELECT ");
+        //    var c = instance.Changed().ToDictionary(c1 => c1.Item1);
+
+        //    if (!c.Any())
+        //        return null;
+
+        //    sb.Append("UPDATE ");
+        //    sb.Append(_predicateGenerator.WriteMember(mapping.TableName));
+        //    sb.Append(" SET ");
+
         //    string comma = string.Empty;
+        //    object newValueSecurity = null;
+        //    PropertyMapping security = null;
+
         //    foreach (PropertyMapping field in mapping.Fields)
         //    {
 
-        //        sb.Append(comma);
-        //        sb.Append(field.FieldName);
+        //        if (field.SecurityCoherence)
+        //        {
+
+        //            newValueSecurity = field.GetValue(instance);
+        //            if (newValueSecurity is IField f)
+        //            {
+
+        //                newValueSecurity = f.Value;
+
+        //                if (!f.HasModified)
+        //                {
+
+        //                    newValueSecurity = field.Type == typeof(Guid) || field.Type == typeof(FieldValue<Guid>)
+        //                        ? (object)Guid.NewGuid()
+        //                        : null
+        //                        ;
+
+        //                    f.Value = newValueSecurity;
+
+        //                }
+
+        //            }
+
+        //            sb.Append(comma);
+        //            sb.Append(_predicateGenerator.WriteMember(field.FieldName));
+        //            sb.Append(" = ");
+
+        //            sb.Append(_predicateGenerator.WriteParameter("new" + field.FieldName));
+        //            _arguments.Add(Manager.CreateParameter("new" + field.FieldName, field.DbType, newValueSecurity));
+        //            security = field;
+
+        //        }
+        //        else if (field.LastChangeDate)
+        //        {
+
+        //            sb.Append(comma);
+        //            sb.Append(_predicateGenerator.WriteMember(field.FieldName));
+        //            sb.Append(" = ");
+
+        //            sb.Append(_predicateGenerator.CurrentTimestamp);
+
+        //        }
+        //        else
+        //        {
+
+        //            if (!c.ContainsKey(field.Name))
+        //                continue;
+
+        //            sb.Append(comma);
+        //            sb.Append(_predicateGenerator.WriteMember(field.FieldName));
+        //            sb.Append(" = ");
+
+        //            var value = field.GetValue(instance);
+        //            if (value is IField f)
+        //                value = f.Value;
+
+        //            sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
+        //            _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
+        //        }
 
         //        comma = ", ";
 
         //    }
 
-        //    sb.Append(" FROM ");
-        //    sb.Append(mapping.TableName);
+        //    sb.Append(" WHERE ");
+        //    comma = string.Empty;
+        //    foreach (PropertyMapping field in mapping.Fields)
+        //        if (field.IsPrimaryKey)
+        //        {
 
-        //    return sb;
+        //            sb.Append(comma);
+        //            sb.Append(_predicateGenerator.WriteMember(field.FieldName));
+        //            sb.Append(" = ");
+        //            sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
+
+        //            var value = field.GetValue(instance);
+        //            if (value is IField f)
+        //            {
+        //                if (f.IsDefaultValue(f.OldValue))
+        //                    value = f.Value;
+        //                else
+        //                    value = f.OldValue;
+        //            }
+
+        //            _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
+
+        //            comma = " AND ";
+
+        //        }
+
+
+        //    if (security != null)
+        //    {
+
+        //        var value = security.GetValue(instance);
+        //        if (value is IField f)
+        //            value = f.OldValue;
+
+        //        sb.Append(comma);
+        //        sb.Append(security.FieldName);
+        //        sb.Append(" = @");
+        //        sb.Append("old" + security.FieldName);
+
+        //        _arguments.Add(Manager.CreateParameter("old" + security.FieldName, security.DbType, value));
+
+        //    }
+
+        //    return new QueryCommand(sb, _arguments.ToArray());
 
         //}
-        //public (StringBuilder, DbParameter[]) Where<T>(StringBuilder sb, ObjectMapping mapping, Expression<Func<T, bool>>[] e)
+
+        //public QueryCommand Remove(object instance, ObjectMapping mapping)
         //{
 
+        //    StringBuilder sb = new StringBuilder(mapping.Columns * 100);
         //    List<DbParameter> _arguments = new List<DbParameter>();
 
+        //    sb.Append("DELETE FROM ");
+        //    sb.Append(_predicateGenerator.WriteMember(mapping.TableName));
+
+        //    string comma = string.Empty;
+
         //    sb.Append(" WHERE ");
+        //    comma = string.Empty;
+        //    foreach (PropertyMapping field in mapping.Fields)
+        //        if (field.IsPrimaryKey)
+        //        {
 
-        //    ParsePredicate(e.Cast<Expression>().ToArray(), sb, _arguments, mapping);
+        //            sb.Append(comma);
+        //            sb.Append(_predicateGenerator.WriteMember(field.FieldName));
+        //            sb.Append(" = ");
+        //            sb.Append(_predicateGenerator.WriteParameter(field.VariableName));
 
-        //    return (sb, _arguments.ToArray());
+        //            var value = field.GetValue(instance);
+        //            if (value is IField f)
+        //            {
+        //                if (f.IsDefaultValue(f.OldValue))
+        //                    value = f.Value;
+        //                else
+        //                    value = f.OldValue;
+        //            }
+
+        //            _arguments.Add(Manager.CreateParameter(field.VariableName, field.DbType, value));
+
+        //            comma = " AND ";
+
+        //        }
+
+        //    foreach (PropertyMapping security in mapping.Fields)
+        //        if (security.SecurityCoherence)
+        //        {
+        //            var value = security.GetValue(instance);
+        //            if (value is IField f)
+        //                value = f.OldValue;
+
+        //            sb.Append(comma);
+        //            sb.Append(security.FieldName);
+        //            sb.Append(" = @");
+        //            sb.Append("old" + security.FieldName);
+
+        //            _arguments.Add(Manager.CreateParameter("old" + security.FieldName, security.DbType, value));
+        //        }
+
+
+        //    return new QueryCommand(sb, _arguments.ToArray());
 
         //}
 
+        //#endregion manuel
 
     }
 

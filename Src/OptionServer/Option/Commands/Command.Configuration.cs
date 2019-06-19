@@ -72,7 +72,6 @@ namespace Bb.Option.Commands
                         return 1;
                     }
 
-
                     string n = System.IO.Path.GetFileNameWithoutExtension(argFile.Value.GetFilename().Name);
                     string[] names = n.Split('.');
 

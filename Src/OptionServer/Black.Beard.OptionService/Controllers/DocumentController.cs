@@ -22,7 +22,6 @@ namespace Bb.Controllers
         public ActionResult<RootResultModel<DocumentModel>> Create([FromBody]DocumentModel model)
         {
 
-
             DocumentModel execute(ControllerBase self, string username)
             {
                 var user = _service.User(username);

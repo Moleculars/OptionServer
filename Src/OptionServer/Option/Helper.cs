@@ -305,10 +305,10 @@ namespace Bb.Option
         }
 
 
-        public static List<TypeToShow> ConvertDataToShow(List<TypeModel> datas)
-        {
-            return datas.Select(c => new TypeToShow(c)).ToList();
-        }
+        //public static List<TypeToShow> ConvertDataToShow(List<TypeModel> datas)
+        //{
+        //    return datas.Select(c => new TypeToShow(c)).ToList();
+        //}
 
 
         private static readonly string filename;

@@ -35,6 +35,12 @@ namespace Bb.OptionServer
         public bool LastChangeDate { get; private set; }
         public bool SecurityCoherence { get; private set; }
 
+
+        public bool IsGuid()
+        {
+            return Type == typeof(Guid) || Type == typeof(FieldValue<Guid>);
+        }
+
         public void Validate(object instance)
         {
 

@@ -50,6 +50,7 @@ namespace Bb.Option.Commands
 
         public static BbClientHttp Client => new BbClientHttp(new Uri(Helper.Parameters.ServerUrl));
 
+        public static object Result { get; internal set; }
 
         public const string HelpFlag = "-? |-h |--help";
         public const string VersionFlag = "-v |--version";

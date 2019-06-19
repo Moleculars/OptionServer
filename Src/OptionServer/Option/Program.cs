@@ -24,10 +24,10 @@ namespace Option
                     .CommandServer()
                     .CommandUser()
                     .CommandGroup()
-                    .CommandEnvironment()
-                    .CommandType()
-                    .CommandApplication()
-                    .CommandConfiguration()
+                    //.CommandEnvironment()
+                    //.CommandType()
+                    //.CommandApplication()
+                    //.CommandConfiguration()
                 ;
 
                 if (Output.DebugModeActivated)
@@ -48,7 +48,7 @@ namespace Option
             }            
             catch(System.FormatException e2)
             {
-                FormatExpetion(app, e2);
+                FormatException(app, e2);
             }
             catch (AuthenticationException)
             {
@@ -72,7 +72,7 @@ namespace Option
             {
                 Exception(e);
             }
-
+            
         }
 
         private static void Exception(Exception e)
@@ -101,7 +101,7 @@ namespace Option
             Environment.ExitCode = Program.ExitCode = 1;
         }
 
-        private static void FormatExpetion(CommandLineApplication app, FormatException e2)
+        private static void FormatException(CommandLineApplication app, FormatException e2)
         {
             Output.ErrorWriteLine(e2.Message);
             Output.Flush();

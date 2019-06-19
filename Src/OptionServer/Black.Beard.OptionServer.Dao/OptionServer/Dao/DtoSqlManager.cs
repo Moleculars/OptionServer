@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bb.OptionServer.Dao;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -8,11 +9,13 @@ namespace Bb.OptionServer
     public class DtoSqlManager
     {
 
-        public DtoSqlManager(IQueryGenerator generator)
+
+        public DtoSqlManager(SqlManager manager)
         {
-            _generator = generator;
-            _manager = generator.Manager;
+            _generator = manager.QueryGenerator;
+            _manager = manager;
         }
+
 
         public bool Insert<T>(T item)
         {
@@ -21,9 +24,9 @@ namespace Bb.OptionServer
 
             mapping.Validate(item);
 
-            var query = _generator.Insert(item, mapping);
-
-            var result = _manager.Update(query.Item1.ToString(), query.Item2);
+            var queryModel = ExtractQueryGenerator.Insert(item, mapping);
+            QueryCommand query = _generator.Generate(queryModel);
+            var result = _manager.Update(query.CommandText.ToString(), query.Arguments);
 
             if (result)
                 item.Reset();
@@ -39,13 +42,14 @@ namespace Bb.OptionServer
 
             mapping.Validate(item);
 
-            var query = _generator.Update(item, mapping);
+            var queryModel = ExtractQueryGenerator.Update(item, mapping);
+            QueryCommand query = _generator.Generate(queryModel);
 
             bool result = false;
-            if (query.Item1.Length > 0)
+            if (query != null && query.CommandText.Length > 0)
             {
 
-                result = _manager.Update(query.Item1.ToString(), query.Item2);
+                result = _manager.Update(query.CommandText.ToString(), query.Arguments);
 
                 if (result)
                     item.Reset();
@@ -63,13 +67,14 @@ namespace Bb.OptionServer
 
             mapping.Validate(item);
 
-            var query = _generator.Remove(item, mapping);
+            var queryModel = ExtractQueryGenerator.Insert(item, mapping);
+            QueryCommand query = _generator.Generate(queryModel);
 
             bool result = false;
-            if (query.Item1.Length > 0)
+            if (query != null && query.CommandText.Length > 0)
             {
 
-                result = _manager.Update(query.Item1.ToString(), query.Item2);
+                result = _manager.Update(query.CommandText.ToString(), query.Arguments);
 
                 if (result)
                     item.Reset();
@@ -89,7 +94,7 @@ namespace Bb.OptionServer
 
             var query = _generator.Select(mapping, e);
 
-            var result = _manager.Read<T>(query.Item1.ToString(), mapping, query.Item2);
+            var result = _manager.Read<T>(query.CommandText.ToString(), mapping, query.Arguments);
 
             return result;
 
@@ -103,7 +108,7 @@ namespace Bb.OptionServer
 
             var query = _generator.Select(mapping, e);
 
-            var result = _manager.Read<T>(query.Item1.ToString(), mapping, query.Item2);
+            var result = _manager.Read<T>(query.CommandText.ToString(), mapping, query.Arguments);
 
             return result;
 
@@ -124,6 +129,8 @@ namespace Bb.OptionServer
         }
 
         public SqlManager Sql => _manager;
+
+        public IQueryGenerator Generator => _generator;
 
         private static readonly Dictionary<Type, ObjectMapping> _mappings = new Dictionary<Type, ObjectMapping>();
         private readonly IQueryGenerator _generator;

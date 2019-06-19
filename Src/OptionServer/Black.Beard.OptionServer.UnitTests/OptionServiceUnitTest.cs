@@ -142,6 +142,9 @@ namespace Black.Beard.OptionServer.UnitTests
 
             var type = manager.AddType(userOwner, "group1", "type1", "json", string.Empty);
 
+            Assert.AreEqual(type.Extension, ".json");
+            Assert.AreEqual(type.TypeName, "type1");
+
 
         }
 
@@ -254,6 +257,8 @@ namespace Black.Beard.OptionServer.UnitTests
             Assert.AreEqual(docs.ConfigurationName, "doc1.json");
 
             manager.DeleteDocument(userOwner, "application1", "doc1.json", docs.Version, docs.Environment.EnvironmentName);
+
+
 
         }
 
